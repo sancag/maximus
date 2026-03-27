@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Maximus</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="layout">
+  <button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
+  <nav class="sidebar">
+    <a href="index.html" class="sidebar-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><style>.bg{fill:#0b0b0b}.hex{stroke:#C4851A;fill:none;stroke-width:.5}.m{stroke:#E8A422;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.node{fill:#C4851A}.node-bright{fill:#E8A422}</style></defs><rect class="bg" width="32" height="32" rx="7"/><line class="hex" x1="16" y1="2.5" x2="27.5" y2="9"/><line class="hex" x1="27.5" y1="11" x2="27.5" y2="21"/><line class="hex" x1="27.5" y1="23" x2="16" y2="29.5"/><line class="hex" x1="4.5" y1="23" x2="16" y2="29.5"/><line class="hex" x1="4.5" y1="11" x2="4.5" y2="21"/><line class="hex" x1="4.5" y1="9" x2="16" y2="2.5"/><circle class="node-bright" cx="16" cy="2.5" r="1.1"/><circle class="node" cx="27.5" cy="10" r="1.1"/><circle class="node" cx="27.5" cy="22" r="1.1"/><circle class="node" cx="16" cy="29.5" r="1.1"/><circle class="node" cx="4.5" cy="22" r="1.1"/><circle class="node" cx="4.5" cy="10" r="1.1"/><polyline class="m" points="7,23 7,9 16,17 25,9 25,23"/><circle class="node-bright" cx="7" cy="23" r="1.4"/><circle class="node-bright" cx="25" cy="23" r="1.4"/><circle class="node-bright" cx="16" cy="17" r="1.6"/></svg><span>Maximus</span></a>
+    <div class="sidebar-section"><div class="sidebar-section-label">Getting Started</div><a href="index.html">Overview</a><a href="getting-started.html">Quick Start</a></div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Core Concepts</div><a href="agent-definition.html">Agent Definitions</a><a href="skill-definition.html">Skill Definitions</a><a href="credential-vault.html">Credential Vault</a><a href="multi-agent.html">Multi-Agent Coordination</a></div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Systems</div><a href="knowledge-graph.html">Knowledge Graph</a><a href="memory-evolution.html">Memory Evolution</a><a href="dashboard.html" class="active">Dashboard</a></div>
+  </nav>
+  <div class="main"><div class="page">
+
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <h1>Mission Control Dashboard</h1>
+      <p>A JARVIS-inspired real-time dashboard for monitoring and interacting with your agent teams. Built with Next.js 16, React 19, Zustand, and Tailwind CSS v4.</p>
+    </div>
+
+    <!-- Overview -->
+    <section>
+      <h2>Overview</h2>
+      <p class="prose" style="margin-bottom:20px;">The Mission Control dashboard provides seven core views for monitoring agent activity, exploring hierarchy, chatting with your orchestrator, tracking tasks, visualizing knowledge, inspecting agent memory, and managing scheduled jobs. It connects to the Maximus server via REST API (initial state sync) and WebSocket (real-time event streaming).</p>
+      <div class="card-grid three">
+        <div class="card-sm">
+          <div class="label">Framework</div>
+          <div class="value">Next.js 16 + React 19</div>
+        </div>
+        <div class="card-sm">
+          <div class="label">State</div>
+          <div class="value">Zustand store</div>
+        </div>
+        <div class="card-sm">
+          <div class="label">Styling</div>
+          <div class="value">Tailwind CSS v4</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Layout -->
+    <section>
+      <h2>Layout</h2>
+      <p class="prose" style="margin-bottom:20px;">The shell consists of three regions:</p>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="component-item">
+          <div class="component-name">Header Bar <span class="pill pill-dim">fixed, top</span></div>
+          <p class="prose-sm">Displays the Maximus branding, active agent count, running task count, and a WebSocket connection status indicator dot (green = connected, amber pulsing = reconnecting, red = disconnected). When reconnecting, a banner appears below the header.</p>
+        </div>
+        <div class="component-item" style="margin-top:16px;">
+          <div class="component-name">Sidebar <span class="pill pill-dim">fixed, left</span></div>
+          <p class="prose-sm">A narrow 48px icon rail with seven navigation buttons: Operations, Org Chart, Chat, Tasks, Knowledge Graph, Agent Memory, and Jobs. The active view is highlighted with an accent color and a left-edge accent bar. Icons are sourced from <code>lucide-react</code>.</p>
+        </div>
+        <div class="component-item" style="margin-top:16px;">
+          <div class="component-name">Content Area</div>
+          <p class="prose-sm">The active view fills the remaining space to the right of the sidebar and below the header. Client-side view routing is managed through Zustand state rather than URL routes.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Views -->
+    <section>
+      <h2>Views <span class="tag">7 Views</span></h2>
+
+      <!-- Operations -->
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="margin-top:0;">Operations</h3>
+        <p class="prose-sm" style="margin-bottom:16px;">Real-time activity feed of agent events displayed newest-first in a scrollable list. Each event is rendered as an <code>EventCard</code> showing a colored icon, agent name, event summary, and relative timestamp. Events arrive via WebSocket and are capped at 500 in the Zustand store.</p>
+        <p class="prose-sm" style="margin-bottom:8px;"><strong>Features:</strong> Filter by event type (toggle chips), filter by agent name (text input), expand any event card to see full JSON payload.</p>
+        <h3>Event Types</h3>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table>
+            <thead>
+              <tr>
+                <th>Event Type</th>
+                <th>Icon</th>
+                <th>Color</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>agent:message</code></td>
+                <td>MessageSquare</td>
+                <td><span class="pill pill-blue">accent (cyan)</span></td>
+              </tr>
+              <tr>
+                <td><code>agent:tool_call</code></td>
+                <td>Wrench</td>
+                <td><span class="pill pill-amber">warning (amber)</span></td>
+              </tr>
+              <tr>
+                <td><code>agent:tool_result</code></td>
+                <td>CheckCircle</td>
+                <td><span class="pill pill-green">success (green)</span></td>
+              </tr>
+              <tr>
+                <td><code>agent:delegation</code></td>
+                <td>Send</td>
+                <td><span class="pill pill-blue">accent (cyan)</span></td>
+              </tr>
+              <tr>
+                <td><code>agent:completion</code></td>
+                <td>CheckCheck</td>
+                <td><span class="pill pill-green">success (green)</span></td>
+              </tr>
+              <tr>
+                <td><code>agent:error</code></td>
+                <td>AlertTriangle</td>
+                <td><span class="pill pill-danger">destructive (red)</span></td>
+              </tr>
+              <tr>
+                <td><code>session:start</code></td>
+                <td>Play</td>
+                <td><span class="pill pill-green">success (green)</span></td>
+              </tr>
+              <tr>
+                <td><code>session:end</code></td>
+                <td>Square</td>
+                <td><span class="pill pill-dim">secondary (gray)</span></td>
+              </tr>
+              <tr>
+                <td><code>task:created</code></td>
+                <td>PlusCircle</td>
+                <td><span class="pill pill-blue">accent (cyan)</span></td>
+              </tr>
+              <tr>
+                <td><code>task:assigned</code></td>
+                <td>UserCheck</td>
+                <td><span class="pill pill-blue">accent (cyan)</span></td>
+              </tr>
+              <tr>
+                <td><code>task:completed</code></td>
+                <td>CircleCheckBig</td>
+                <td><span class="pill pill-green">success (green)</span></td>
+              </tr>
+              <tr>
+                <td><code>task:failed</code></td>
+                <td>XCircle</td>
+                <td><span class="pill pill-danger">destructive (red)</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Org Chart -->
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="margin-top:0;">Org Chart</h3>
+        <p class="prose-sm" style="margin-bottom:12px;">Canvas-based visualization of your agent hierarchy as a top-down tree. The orchestrator sits at the top, managers below, and workers at the bottom.</p>
+        <div class="card-grid">
+          <div class="card-sm">
+            <div class="label">Agent Nodes</div>
+            <div class="value">Each node shows agent name, status badge (idle / active / error), and current task prompt if in-progress. Active agents have a glowing accent-colored border.</div>
+          </div>
+          <div class="card-sm">
+            <div class="label">Status Derivation</div>
+            <div class="value">Derived by scanning the last 100 events newest-first. The first status-determining event per agent wins: <code>session:start</code> = active, <code>session:end</code> = idle, <code>agent:error</code> = error.</div>
+          </div>
+          <div class="card-sm">
+            <div class="label">Connection Lines</div>
+            <div class="value">Vertical and horizontal lines connect parent to children. Recent delegation events cause the connection line to glow with an accent shadow effect.</div>
+          </div>
+          <div class="card-sm">
+            <div class="label">Detail Panel</div>
+            <div class="value">Click any node to open a slide-out panel showing agent description, skills list, recent activity (last 5 events), and active tasks.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat -->
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="margin-top:0;">Chat</h3>
+        <p class="prose-sm" style="margin-bottom:12px;">Direct messaging interface to the orchestrator agent with SSE streaming responses.</p>
+        <div class="card-grid">
+          <div class="card-sm">
+            <div class="label">Messaging</div>
+            <div class="value">Type in the textarea and press Enter to send. Messages route to the orchestrator (agent with no <code>reportsTo</code>). Shift+Enter inserts a newline.</div>
+          </div>
+          <div class="card-sm">
+            <div class="label">Streaming</div>
+            <div class="value">Responses stream via SSE with <code>data:</code> lines. The message bubble glows during streaming with a pulsing cursor bar.</div>
+          </div>
+          <div class="card-sm">
+            <div class="label">Markdown</div>
+            <div class="value">Assistant messages render with <code>react-markdown</code> supporting code blocks, inline code, lists, and links.</div>
+          </div>
+          <div class="card-sm">
+            <div class="label">Auto-scroll</div>
+            <div class="value">The message list auto-scrolls to the bottom on new messages. Send button is disabled while input is empty or response is streaming.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tasks -->
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="margin-top:0;">Tasks</h3>
+        <p class="prose-sm" style="margin-bottom:12px;">Sortable, filterable table displaying all tasks. Columns: Task ID, Agent, Status, Trace ID, Created, Updated. Click any column header to toggle ascending/descending sort.</p>
+        <p class="prose-sm" style="margin-bottom:8px;"><strong>Filters:</strong> Filter by agent name (text input), trace ID (text input), or status (dropdown: All, created, assigned, in-progress, completed, failed).</p>
+        <p class="prose-sm" style="margin-bottom:8px;"><strong>Expandable rows:</strong> Click any row to see full prompt text, parent task ID, result or error, and token usage count.</p>
+        <h3>Status Badges</h3>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Color</th>
+                <th>Badge</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>created</code></td>
+                <td>gray (text-secondary)</td>
+                <td><span class="pill pill-dim">created</span></td>
+              </tr>
+              <tr>
+                <td><code>assigned</code></td>
+                <td>cyan (accent)</td>
+                <td><span class="pill pill-blue">assigned</span></td>
+              </tr>
+              <tr>
+                <td><code>in-progress</code></td>
+                <td>amber (warning)</td>
+                <td><span class="pill pill-amber">in-progress</span></td>
+              </tr>
+              <tr>
+                <td><code>completed</code></td>
+                <td>green (success)</td>
+                <td><span class="pill pill-green">completed</span></td>
+              </tr>
+              <tr>
+                <td><code>failed</code></td>
+                <td>red (destructive)</td>
+                <td><span class="pill pill-danger">failed</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Knowledge Graph -->
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="margin-top:0;">Knowledge Graph</h3>
+        <p class="prose-sm">Force-directed graph visualization of entities and relationships extracted from agent sessions. Supports scope filtering (agent, team, global) to narrow the visible graph. Nodes represent entities and edges represent predicates between them.</p>
+      </div>
+
+      <!-- Agent Memory -->
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="margin-top:0;">Agent Memory</h3>
+        <p class="prose-sm">Split-panel view for inspecting agent memory. The left panel lists agents with memory enabled; the right panel displays episodes, knowledge graph entries, and performance trends for the selected agent. Episodes are shown newest-first with timestamps and distilled summaries.</p>
+      </div>
+
+      <!-- Jobs -->
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="margin-top:0;">Jobs</h3>
+        <p class="prose-sm">Full CRUD interface for managing scheduled jobs. Create, edit, and delete jobs with cron expressions. View run history with status indicators (success, failure, running) and timestamps. Jobs are persisted server-side and execute on the configured schedule.</p>
+      </div>
+    </section>
+
+    <!-- Connection Handling -->
+    <section>
+      <h2>Connection Handling</h2>
+      <p class="prose" style="margin-bottom:20px;">The dashboard manages the WebSocket connection automatically via the <code>useWebSocket</code> hook. No user action is required &mdash; the entire reconnection flow is fully automatic.</p>
+      <div class="card-grid">
+        <div class="card-sm">
+          <div class="label">Auto-connect</div>
+          <div class="value">On page load, the dashboard opens a WebSocket connection to the server automatically.</div>
+        </div>
+        <div class="card-sm">
+          <div class="label">Status Indicator</div>
+          <div class="value"><span class="pill pill-green">green</span> connected &middot; <span class="pill pill-amber">amber</span> reconnecting &middot; <span class="pill pill-danger">red</span> disconnected</div>
+        </div>
+        <div class="card-sm">
+          <div class="label">Exponential Backoff</div>
+          <div class="value">On disconnect, reconnection attempts start at 1s and double each attempt (1s, 2s, 4s, 8s, 16s...) capped at 30 seconds.</div>
+        </div>
+        <div class="card-sm">
+          <div class="label">State Resync</div>
+          <div class="value">On reconnect, the <code>syncState</code> function fetches the full agent list and task list from <code>/api/org-chart</code> and <code>/api/tasks</code>.</div>
+        </div>
+      </div>
+      <p class="prose-sm" style="margin-top:14px;">While reconnecting, a banner reading "Reconnecting to server..." appears below the header with a warning color background. The event store (capped at 500 events) continues accumulating events once the connection is restored.</p>
+    </section>
+
+    <!-- Running the Dashboard -->
+    <section>
+      <h2>Running the Dashboard</h2>
+      <p class="prose" style="margin-bottom:20px;">The dashboard is served from the Maximus server on port <strong>4100</strong>. Start the server and open <a href="http://localhost:4100" style="color:var(--gold);text-decoration:none;">http://localhost:4100</a> in your browser.</p>
+      <pre><span class="cm"># Start the Maximus server (serves dashboard on port 4100)</span>
+<span class="kw">maximus</span> server start
+
+<span class="cm"># Or run in foreground</span>
+<span class="kw">maximus</span> server start <span class="str">--foreground</span>
+
+<span class="cm"># Open in browser</span>
+<span class="fn">open</span> http://localhost:4100</pre>
+      <p class="prose-sm" style="margin-top:14px;">The dashboard defaults to the Operations view on load.</p>
+    </section>
+
+    <!-- Configuration -->
+    <section>
+      <h2>Configuration</h2>
+      <p class="prose" style="margin-bottom:16px;">The dashboard reads two environment variables at build time:</p>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Variable</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>NEXT_PUBLIC_API_URL</code></td>
+              <td><code>http://localhost:4100</code></td>
+              <td>Base URL for the Maximus REST API server</td>
+            </tr>
+            <tr>
+              <td><code>NEXT_PUBLIC_WS_URL</code></td>
+              <td><code>ws://localhost:4100/ws</code></td>
+              <td>WebSocket endpoint for real-time event streaming</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose-sm" style="margin-top:12px;">Set these in a <code>.env.local</code> file in <code>packages/dashboard/</code> or export them before building.</p>
+    </section>
+
+    <footer>
+      Maximus &mdash; Multi-Agent Orchestration Framework &middot; <a href="https://github.com/sancag/maximus">GitHub</a>
+    </footer>
+
+  </div></div>
+</div>
+
+</body>
+</html>

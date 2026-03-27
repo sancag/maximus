@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Definition Format — Maximus</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="layout">
+  <button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
+  <nav class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><style>.bg{fill:#0b0b0b}.hex{stroke:#C4851A;fill:none;stroke-width:.5}.m{stroke:#E8A422;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.node{fill:#C4851A}.node-bright{fill:#E8A422}</style></defs><rect class="bg" width="32" height="32" rx="7"/><line class="hex" x1="16" y1="2.5" x2="27.5" y2="9"/><line class="hex" x1="27.5" y1="11" x2="27.5" y2="21"/><line class="hex" x1="27.5" y1="23" x2="16" y2="29.5"/><line class="hex" x1="4.5" y1="23" x2="16" y2="29.5"/><line class="hex" x1="4.5" y1="11" x2="4.5" y2="21"/><line class="hex" x1="4.5" y1="9" x2="16" y2="2.5"/><circle class="node-bright" cx="16" cy="2.5" r="1.1"/><circle class="node" cx="27.5" cy="10" r="1.1"/><circle class="node" cx="27.5" cy="22" r="1.1"/><circle class="node" cx="16" cy="29.5" r="1.1"/><circle class="node" cx="4.5" cy="22" r="1.1"/><circle class="node" cx="4.5" cy="10" r="1.1"/><polyline class="m" points="7,23 7,9 16,17 25,9 25,23"/><circle class="node-bright" cx="7" cy="23" r="1.4"/><circle class="node-bright" cx="25" cy="23" r="1.4"/><circle class="node-bright" cx="16" cy="17" r="1.6"/></svg>
+      <span>Maximus</span>
+    </a>
+    <div class="sidebar-section"><div class="sidebar-section-label">Getting Started</div><a href="index.html">Overview</a><a href="getting-started.html">Quick Start</a></div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Core Concepts</div><a href="agent-definition.html" class="active">Agent Definitions</a><a href="skill-definition.html">Skill Definitions</a><a href="credential-vault.html">Credential Vault</a><a href="multi-agent.html">Multi-Agent Coordination</a></div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Systems</div><a href="knowledge-graph.html">Knowledge Graph</a><a href="memory-evolution.html">Memory Evolution</a><a href="dashboard.html">Dashboard</a></div>
+  </nav>
+  <div class="main"><div class="page">
+
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <h1>Agent Definition Format</h1>
+      <p>Agents are defined as Markdown files with YAML frontmatter. The frontmatter contains metadata&mdash;name, description, model, skills&mdash;while the Markdown body becomes the agent's system prompt.</p>
+    </div>
+
+    <!-- Schema Section -->
+    <section>
+      <h2>Schema <span class="tag">Reference</span></h2>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Type</th>
+              <th>Required</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>name</strong></td>
+              <td><code>string</code></td>
+              <td><span class="pill pill-green">Yes</span></td>
+              <td>&mdash;</td>
+              <td>Unique identifier (1&ndash;100 chars)</td>
+            </tr>
+            <tr>
+              <td><strong>description</strong></td>
+              <td><code>string</code></td>
+              <td><span class="pill pill-green">Yes</span></td>
+              <td>&mdash;</td>
+              <td>Brief role description (1&ndash;500 chars)</td>
+            </tr>
+            <tr>
+              <td><strong>model</strong></td>
+              <td><code>"sonnet"</code> | <code>"opus"</code> | <code>"haiku"</code></td>
+              <td><span class="pill pill-dim">No</span></td>
+              <td><code>"sonnet"</code></td>
+              <td>Claude model to use</td>
+            </tr>
+            <tr>
+              <td><strong>maxTurns</strong></td>
+              <td><code>number</code></td>
+              <td><span class="pill pill-dim">No</span></td>
+              <td><code>25</code></td>
+              <td>Max tool-use turns (1&ndash;500)</td>
+            </tr>
+            <tr>
+              <td><strong>maxDurationSeconds</strong></td>
+              <td><code>number</code></td>
+              <td><span class="pill pill-dim">No</span></td>
+              <td>&mdash;</td>
+              <td>Max wall-clock time (10&ndash;3600)</td>
+            </tr>
+            <tr>
+              <td><strong>skills</strong></td>
+              <td><code>string[]</code></td>
+              <td><span class="pill pill-dim">No</span></td>
+              <td><code>[]</code></td>
+              <td>Skill names to attach</td>
+            </tr>
+            <tr>
+              <td><strong>reportsTo</strong></td>
+              <td><code>string</code></td>
+              <td><span class="pill pill-dim">No</span></td>
+              <td>&mdash;</td>
+              <td>Parent agent name</td>
+            </tr>
+            <tr>
+              <td><strong>memory</strong></td>
+              <td><code>object</code></td>
+              <td><span class="pill pill-dim">No</span></td>
+              <td>&mdash;</td>
+              <td>Memory configuration</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Memory Sub-fields -->
+    <section>
+      <h2>Memory Sub-fields</h2>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>episodic</strong></td>
+              <td><code>boolean</code></td>
+              <td>Enable episodic memory for the agent</td>
+            </tr>
+            <tr>
+              <td><strong>maxEpisodes</strong></td>
+              <td><code>number</code></td>
+              <td>Maximum number of episodes to retain</td>
+            </tr>
+            <tr>
+              <td><strong>briefingEnabled</strong></td>
+              <td><code>boolean</code></td>
+              <td>Enable pre-run briefings from memory</td>
+            </tr>
+            <tr>
+              <td><strong>briefingTokenBudget</strong></td>
+              <td><code>number</code></td>
+              <td>Token budget for briefing content</td>
+            </tr>
+            <tr>
+              <td><strong>learningRate</strong></td>
+              <td><code>"conservative"</code> | <code>"moderate"</code> | <code>"aggressive"</code></td>
+              <td>How quickly memory adapts to new patterns</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- System Prompt -->
+    <section>
+      <h2>System Prompt</h2>
+      <div class="card">
+        <p class="prose">The Markdown body (everything below the closing <code>---</code> of the YAML frontmatter) becomes the agent's system prompt. This is where you define the agent's personality, behavioral constraints, and domain expertise.</p>
+      </div>
+    </section>
+
+    <!-- Example -->
+    <section>
+      <h2>Example <span class="tag">Agent File</span></h2>
+      <div class="card">
+        <pre><span class="cm">---</span>
+<span class="kw">name</span>: <span class="str">engineering-lead</span>
+<span class="kw">description</span>: <span class="str">Engineering team manager</span>
+<span class="kw">model</span>: <span class="str">sonnet</span>
+<span class="kw">maxTurns</span>: <span class="str">30</span>
+<span class="kw">skills</span>:
+  - <span class="str">github-operations</span>
+<span class="kw">memory</span>:
+  <span class="kw">episodic</span>: <span class="str">true</span>
+  <span class="kw">maxEpisodes</span>: <span class="str">50</span>
+  <span class="kw">briefingEnabled</span>: <span class="str">true</span>
+<span class="cm">---</span>
+
+<span class="cm">You are a pragmatic engineering manager...</span></pre>
+      </div>
+    </section>
+
+    <!-- File Location -->
+    <section>
+      <h2>File Location</h2>
+      <div class="card">
+        <p class="prose">Agent definitions live in the <code>agents/</code> directory with a <code>.md</code> extension. All agent files are auto-loaded when the engine starts up&mdash;no manual registration required.</p>
+      </div>
+    </section>
+
+    <!-- Validation -->
+    <section>
+      <h2>Validation</h2>
+      <div class="card">
+        <p class="prose" style="margin-bottom: 18px;">Agent definitions are validated against a Zod schema at load time. If validation fails, the engine will log a descriptive error and skip the invalid agent.</p>
+        <h3>Common Errors</h3>
+        <div class="card-grid">
+          <div class="card-sm">
+            <div class="label">Missing Fields</div>
+            <div class="value"><code>name</code> and <code>description</code> are both required. Omitting either will cause a validation error.</div>
+          </div>
+          <div class="card-sm">
+            <div class="label">Invalid Model</div>
+            <div class="value">The <code>model</code> field must be one of <code>"sonnet"</code>, <code>"opus"</code>, or <code>"haiku"</code>.</div>
+          </div>
+          <div class="card-sm">
+            <div class="label">maxTurns Out of Range</div>
+            <div class="value"><code>maxTurns</code> must be between <code>1</code> and <code>500</code>. Values outside this range are rejected.</div>
+          </div>
+          <div class="card-sm">
+            <div class="label">Duration Bounds</div>
+            <div class="value"><code>maxDurationSeconds</code> must be between <code>10</code> and <code>3600</code> when specified.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      Maximus &mdash; Self-Hosted Agent Orchestration &nbsp;|&nbsp; <a href="index.html">Home</a>
+    </footer>
+
+  </div></div>
+</div>
+</body>
+</html>

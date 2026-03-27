@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill Definitions — Maximus</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="layout">
+  <button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
+  <nav class="sidebar">
+    <a href="index.html" class="sidebar-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><style>.bg{fill:#0b0b0b}.hex{stroke:#C4851A;fill:none;stroke-width:.5}.m{stroke:#E8A422;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.node{fill:#C4851A}.node-bright{fill:#E8A422}</style></defs><rect class="bg" width="32" height="32" rx="7"/><line class="hex" x1="16" y1="2.5" x2="27.5" y2="9"/><line class="hex" x1="27.5" y1="11" x2="27.5" y2="21"/><line class="hex" x1="27.5" y1="23" x2="16" y2="29.5"/><line class="hex" x1="4.5" y1="23" x2="16" y2="29.5"/><line class="hex" x1="4.5" y1="11" x2="4.5" y2="21"/><line class="hex" x1="4.5" y1="9" x2="16" y2="2.5"/><circle class="node-bright" cx="16" cy="2.5" r="1.1"/><circle class="node" cx="27.5" cy="10" r="1.1"/><circle class="node" cx="27.5" cy="22" r="1.1"/><circle class="node" cx="16" cy="29.5" r="1.1"/><circle class="node" cx="4.5" cy="22" r="1.1"/><circle class="node" cx="4.5" cy="10" r="1.1"/><polyline class="m" points="7,23 7,9 16,17 25,9 25,23"/><circle class="node-bright" cx="7" cy="23" r="1.4"/><circle class="node-bright" cx="25" cy="23" r="1.4"/><circle class="node-bright" cx="16" cy="17" r="1.6"/></svg><span>Maximus</span></a>
+    <div class="sidebar-section"><div class="sidebar-section-label">Getting Started</div><a href="index.html">Overview</a><a href="getting-started.html">Quick Start</a></div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Core Concepts</div><a href="agent-definition.html">Agent Definitions</a><a href="skill-definition.html" class="active">Skill Definitions</a><a href="credential-vault.html">Credential Vault</a><a href="multi-agent.html">Multi-Agent Coordination</a></div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Systems</div><a href="knowledge-graph.html">Knowledge Graph</a><a href="memory-evolution.html">Memory Evolution</a><a href="dashboard.html">Dashboard</a></div>
+  </nav>
+  <div class="main"><div class="page">
+
+    <!-- ── Page Hero ── -->
+    <div class="page-hero">
+      <h1>Skill Definitions</h1>
+      <p>Skills are YAML files that define reusable tool sets for agents. They declare what an agent can do&mdash;HTTP actions, credential bindings, parameter schemas, and output filters&mdash;in a portable, declarative format.</p>
+    </div>
+
+    <!-- ── Overview ── -->
+    <section>
+      <h2>Overview</h2>
+      <div class="card">
+        <p class="prose">A skill is a self-contained YAML file that packages one or more tools together with their credential requirements and instructions. Agents reference skills by name, gaining access to the defined tool set without knowing the implementation details. The YAML defines <strong>what</strong> the agent can do, not <strong>how</strong> it decides to use it.</p>
+        <br>
+        <div class="card-grid">
+          <div class="card-sm">
+            <div class="label">File Location</div>
+            <div class="value"><code>skills/</code> directory at the project root</div>
+          </div>
+          <div class="card-sm">
+            <div class="label">Extension</div>
+            <div class="value"><code>.yaml</code> or <code>.yml</code></div>
+          </div>
+          <div class="card-sm">
+            <div class="label">Philosophy</div>
+            <div class="value">Declarative &mdash; YAML defines WHAT, not HOW</div>
+          </div>
+          <div class="card-sm">
+            <div class="label">Reusability</div>
+            <div class="value">One skill can be shared across multiple agents</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Schema ── -->
+    <section>
+      <h2>Skill Schema <span class="tag">Reference</span></h2>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Type</th>
+              <th>Required</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong><code>name</code></strong></td>
+              <td><code>string</code></td>
+              <td><span class="pill pill-green">Yes</span></td>
+              <td>Unique identifier for the skill</td>
+            </tr>
+            <tr>
+              <td><strong><code>description</code></strong></td>
+              <td><code>string</code></td>
+              <td><span class="pill pill-green">Yes</span></td>
+              <td>Human-readable summary of what the skill provides</td>
+            </tr>
+            <tr>
+              <td><strong><code>version</code></strong></td>
+              <td><code>string</code></td>
+              <td><span class="pill pill-dim">No</span></td>
+              <td>Semantic version of the skill definition</td>
+            </tr>
+            <tr>
+              <td><strong><code>credentials</code></strong></td>
+              <td><code>array</code></td>
+              <td><span class="pill pill-dim">No</span></td>
+              <td>Credential references from the vault required by this skill</td>
+            </tr>
+            <tr>
+              <td><strong><code>tools</code></strong></td>
+              <td><code>array</code></td>
+              <td><span class="pill pill-green">Yes</span></td>
+              <td>List of tool definitions available in this skill</td>
+            </tr>
+            <tr>
+              <td><strong><code>instructions</code></strong></td>
+              <td><code>string</code></td>
+              <td><span class="pill pill-dim">No</span></td>
+              <td>Natural-language guidance for the agent on when and how to use the tools</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Tool Definition ── -->
+    <section>
+      <h2>Tool Definition</h2>
+      <p class="prose" style="margin-bottom: 18px;">Each entry in the <code>tools</code> array defines a single operation the agent can perform. Tools combine parameter schemas, credential bindings, HTTP actions, and output filtering into a single declarative block.</p>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong><code>name</code></strong></td>
+              <td><code>string</code></td>
+              <td>Unique tool name within the skill</td>
+            </tr>
+            <tr>
+              <td><strong><code>description</code></strong></td>
+              <td><code>string</code></td>
+              <td>What this tool does &mdash; shown to the agent for tool selection</td>
+            </tr>
+            <tr>
+              <td><strong><code>parameters</code></strong></td>
+              <td><code>array</code></td>
+              <td>Inputs the agent must provide when calling the tool</td>
+            </tr>
+            <tr>
+              <td><strong><code>credentials</code></strong></td>
+              <td><code>object</code></td>
+              <td>Vault reference and injection binding</td>
+            </tr>
+            <tr>
+              <td><strong><code>action</code></strong></td>
+              <td><code>object</code></td>
+              <td>The HTTP action to execute (method, URL, headers, body)</td>
+            </tr>
+            <tr>
+              <td><strong><code>output</code></strong></td>
+              <td><code>object</code></td>
+              <td>Response filtering &mdash; allowlist of fields to return</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Parameters ── -->
+    <section>
+      <h2>Parameters</h2>
+      <p class="prose" style="margin-bottom: 18px;">Each parameter declares its type, description, and whether it is required. Parameters are injected into action templates as <code>{{variableName}}</code> placeholders.</p>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong><code>type</code></strong></td>
+              <td><code>string</code></td>
+              <td>One of <code>string</code>, <code>number</code>, or <code>boolean</code></td>
+            </tr>
+            <tr>
+              <td><strong><code>description</code></strong></td>
+              <td><code>string</code></td>
+              <td>Explains to the agent what this parameter controls</td>
+            </tr>
+            <tr>
+              <td><strong><code>required</code></strong></td>
+              <td><code>boolean</code></td>
+              <td>Whether the agent must supply this value</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <pre><span class="kw">parameters</span>:
+  - <span class="kw">name</span>: <span class="str">owner</span>
+    <span class="kw">type</span>: <span class="str">string</span>
+    <span class="kw">description</span>: <span class="str">"GitHub repository owner"</span>
+    <span class="kw">required</span>: <span class="str">true</span>
+  - <span class="kw">name</span>: <span class="str">repo</span>
+    <span class="kw">type</span>: <span class="str">string</span>
+    <span class="kw">description</span>: <span class="str">"Repository name"</span>
+    <span class="kw">required</span>: <span class="str">true</span>
+  - <span class="kw">name</span>: <span class="str">per_page</span>
+    <span class="kw">type</span>: <span class="str">number</span>
+    <span class="kw">description</span>: <span class="str">"Results per page"</span>
+    <span class="kw">required</span>: <span class="str">false</span></pre>
+    </section>
+
+    <!-- ── Credential References ── -->
+    <section>
+      <h2>Credential References</h2>
+      <p class="prose" style="margin-bottom: 18px;">Credentials link a skill to secrets stored in the <a href="credential-vault.html" style="color: var(--gold); text-decoration: none;">Credential Vault</a>. The <code>ref</code> field names the vault entry, and <code>inject_as</code> defines the template variable used in action URLs, headers, or bodies.</p>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong><code>ref</code></strong></td>
+              <td>Name of the credential in the vault (e.g. <code>github-token</code>)</td>
+            </tr>
+            <tr>
+              <td><strong><code>inject_as</code></strong></td>
+              <td>Template variable name used in actions (e.g. <code>GITHUB_TOKEN</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <pre><span class="kw">credentials</span>:
+  - <span class="kw">ref</span>: <span class="str">github-token</span>
+    <span class="kw">inject_as</span>: <span class="str">GITHUB_TOKEN</span></pre>
+      <p class="prose-sm" style="margin-top: 12px;">At runtime, every occurrence of <code>{{GITHUB_TOKEN}}</code> in the action block is replaced with the vault secret.</p>
+    </section>
+
+    <!-- ── Action ── -->
+    <section>
+      <h2>Action <span class="tag">HTTP</span></h2>
+      <p class="prose" style="margin-bottom: 18px;">The action block defines the HTTP request to execute when the tool is called. URLs, headers, and body values can reference both parameters and credentials using <code>{{variable}}</code> syntax.</p>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong><code>type</code></strong></td>
+              <td>Action type &mdash; currently <code>http</code></td>
+            </tr>
+            <tr>
+              <td><strong><code>method</code></strong></td>
+              <td>HTTP method: <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, <code>DELETE</code></td>
+            </tr>
+            <tr>
+              <td><strong><code>url</code></strong></td>
+              <td>Request URL with <code>{{variable}}</code> placeholders</td>
+            </tr>
+            <tr>
+              <td><strong><code>headers</code></strong></td>
+              <td>Key-value map of HTTP headers</td>
+            </tr>
+            <tr>
+              <td><strong><code>body</code></strong></td>
+              <td>Request body (for POST/PUT/PATCH)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <pre><span class="kw">action</span>:
+  <span class="kw">type</span>: <span class="str">http</span>
+  <span class="kw">method</span>: <span class="str">GET</span>
+  <span class="kw">url</span>: <span class="str">"https://api.github.com/repos/{{owner}}/{{repo}}/issues?per_page={{per_page}}"</span>
+  <span class="kw">headers</span>:
+    <span class="kw">Authorization</span>: <span class="str">"Bearer {{GITHUB_TOKEN}}"</span>
+    <span class="kw">Accept</span>: <span class="str">"application/vnd.github.v3+json"</span></pre>
+    </section>
+
+    <!-- ── Output Filtering ── -->
+    <section>
+      <h2>Output Filtering</h2>
+      <p class="prose" style="margin-bottom: 18px;">The output block defines an allowlist of response fields to return to the agent. This keeps payloads lean and prevents the agent from receiving unnecessary data that could consume context tokens.</p>
+      <pre><span class="kw">output</span>:
+  <span class="kw">include</span>:
+    - <span class="str">id</span>
+    - <span class="str">title</span>
+    - <span class="str">state</span>
+    - <span class="str">assignee.login</span>
+    - <span class="str">labels[].name</span>
+    - <span class="str">created_at</span></pre>
+      <p class="prose-sm" style="margin-top: 12px;">Only the listed fields (and nested paths) are extracted from the API response. Everything else is dropped before the result reaches the agent.</p>
+    </section>
+
+    <!-- ── Full Example ── -->
+    <section>
+      <h2>Full Example <span class="tag">github-operations</span></h2>
+      <p class="prose" style="margin-bottom: 18px;">A complete skill file combining all the concepts above. This skill gives an agent the ability to list issues from any GitHub repository.</p>
+      <pre><span class="cm"># skills/github-operations.yaml</span>
+
+<span class="kw">name</span>: <span class="str">github-operations</span>
+<span class="kw">description</span>: <span class="str">"GitHub repository tools — issues, PRs, and repo management"</span>
+<span class="kw">version</span>: <span class="str">"1.0.0"</span>
+
+<span class="kw">credentials</span>:
+  - <span class="kw">ref</span>: <span class="str">github-token</span>
+    <span class="kw">inject_as</span>: <span class="str">GITHUB_TOKEN</span>
+
+<span class="kw">tools</span>:
+  - <span class="kw">name</span>: <span class="str">list-issues</span>
+    <span class="kw">description</span>: <span class="str">"List open issues for a GitHub repository"</span>
+
+    <span class="kw">parameters</span>:
+      - <span class="kw">name</span>: <span class="str">owner</span>
+        <span class="kw">type</span>: <span class="str">string</span>
+        <span class="kw">description</span>: <span class="str">"Repository owner (user or org)"</span>
+        <span class="kw">required</span>: <span class="str">true</span>
+      - <span class="kw">name</span>: <span class="str">repo</span>
+        <span class="kw">type</span>: <span class="str">string</span>
+        <span class="kw">description</span>: <span class="str">"Repository name"</span>
+        <span class="kw">required</span>: <span class="str">true</span>
+      - <span class="kw">name</span>: <span class="str">per_page</span>
+        <span class="kw">type</span>: <span class="str">number</span>
+        <span class="kw">description</span>: <span class="str">"Results per page (default 30)"</span>
+        <span class="kw">required</span>: <span class="str">false</span>
+
+    <span class="kw">credentials</span>:
+      <span class="kw">ref</span>: <span class="str">github-token</span>
+      <span class="kw">inject_as</span>: <span class="str">GITHUB_TOKEN</span>
+
+    <span class="kw">action</span>:
+      <span class="kw">type</span>: <span class="str">http</span>
+      <span class="kw">method</span>: <span class="str">GET</span>
+      <span class="kw">url</span>: <span class="str">"https://api.github.com/repos/{{owner}}/{{repo}}/issues?per_page={{per_page}}"</span>
+      <span class="kw">headers</span>:
+        <span class="kw">Authorization</span>: <span class="str">"Bearer {{GITHUB_TOKEN}}"</span>
+        <span class="kw">Accept</span>: <span class="str">"application/vnd.github.v3+json"</span>
+
+    <span class="kw">output</span>:
+      <span class="kw">include</span>:
+        - <span class="str">id</span>
+        - <span class="str">title</span>
+        - <span class="str">state</span>
+        - <span class="str">assignee.login</span>
+        - <span class="str">labels[].name</span>
+        - <span class="str">created_at</span>
+
+<span class="kw">instructions</span>: |
+  <span class="cm">Use list-issues to check the current state of a repository.</span>
+  <span class="cm">Always specify the owner and repo. Use per_page to limit results</span>
+  <span class="cm">when you only need a quick overview.</span></pre>
+    </section>
+
+    <!-- ── Design Philosophy ── -->
+    <section>
+      <h2>Design Philosophy</h2>
+      <div class="card">
+        <div class="card-grid">
+          <div class="component-item">
+            <div class="component-name">Declarative, not imperative</div>
+            <p class="prose-sm">YAML defines <strong>what</strong> the tool does (endpoints, parameters, credentials). The agent decides <strong>when</strong> and <strong>how</strong> to use it based on the task at hand.</p>
+          </div>
+          <div class="component-item green">
+            <div class="component-name">Portable and reusable</div>
+            <p class="prose-sm">A single skill file can be referenced by multiple agents. Change the credential binding once, and every agent using the skill picks up the update.</p>
+          </div>
+          <div class="component-item amber">
+            <div class="component-name">Minimal surface area</div>
+            <p class="prose-sm">Output filtering ensures agents only receive the fields they need. This keeps token budgets tight and reduces hallucination from noisy payloads.</p>
+          </div>
+          <div class="component-item blue">
+            <div class="component-name">Credential isolation</div>
+            <p class="prose-sm">Secrets live in the vault, never in YAML. Skills reference credentials by name and inject them at runtime through template variables.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Related Docs ── -->
+    <section>
+      <h2>Related Documentation</h2>
+      <div class="doc-grid">
+        <a href="agent-definition.html" class="doc-link">
+          <div class="doc-title">Agent Definitions</div>
+          <div class="doc-desc">Define agent identity, skills, and delegation rules</div>
+        </a>
+        <a href="credential-vault.html" class="doc-link">
+          <div class="doc-title">Credential Vault</div>
+          <div class="doc-desc">Securely store and inject secrets into skill actions</div>
+        </a>
+        <a href="multi-agent.html" class="doc-link">
+          <div class="doc-title">Multi-Agent Coordination</div>
+          <div class="doc-desc">Hierarchies, delegation, and task lifecycle</div>
+        </a>
+        <a href="getting-started.html" class="doc-link">
+          <div class="doc-title">Quick Start</div>
+          <div class="doc-desc">Set up your first agent with skills in minutes</div>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      Maximus &mdash; Multi-Agent Orchestration Framework &middot; <a href="https://github.com/sancag/maximus">GitHub</a>
+    </footer>
+
+  </div></div>
+</div>
+
+</body>
+</html>

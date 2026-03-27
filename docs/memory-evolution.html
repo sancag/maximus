@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Evolution Pipeline — Maximus</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="layout">
+  <button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
+  <nav class="sidebar">
+    <a href="index.html" class="sidebar-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><style>.bg{fill:#0b0b0b}.hex{stroke:#C4851A;fill:none;stroke-width:.5}.m{stroke:#E8A422;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.node{fill:#C4851A}.node-bright{fill:#E8A422}</style></defs><rect class="bg" width="32" height="32" rx="7"/><line class="hex" x1="16" y1="2.5" x2="27.5" y2="9"/><line class="hex" x1="27.5" y1="11" x2="27.5" y2="21"/><line class="hex" x1="27.5" y1="23" x2="16" y2="29.5"/><line class="hex" x1="4.5" y1="23" x2="16" y2="29.5"/><line class="hex" x1="4.5" y1="11" x2="4.5" y2="21"/><line class="hex" x1="4.5" y1="9" x2="16" y2="2.5"/><circle class="node-bright" cx="16" cy="2.5" r="1.1"/><circle class="node" cx="27.5" cy="10" r="1.1"/><circle class="node" cx="27.5" cy="22" r="1.1"/><circle class="node" cx="16" cy="29.5" r="1.1"/><circle class="node" cx="4.5" cy="22" r="1.1"/><circle class="node" cx="4.5" cy="10" r="1.1"/><polyline class="m" points="7,23 7,9 16,17 25,9 25,23"/><circle class="node-bright" cx="7" cy="23" r="1.4"/><circle class="node-bright" cx="25" cy="23" r="1.4"/><circle class="node-bright" cx="16" cy="17" r="1.6"/></svg><span>Maximus</span></a>
+    <div class="sidebar-section"><div class="sidebar-section-label">Getting Started</div><a href="index.html">Overview</a><a href="getting-started.html">Quick Start</a></div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Core Concepts</div><a href="agent-definition.html">Agent Definitions</a><a href="skill-definition.html">Skill Definitions</a><a href="credential-vault.html">Credential Vault</a><a href="multi-agent.html">Multi-Agent Coordination</a></div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Systems</div><a href="knowledge-graph.html">Knowledge Graph</a><a href="memory-evolution.html" class="active">Memory Evolution</a><a href="dashboard.html">Dashboard</a></div>
+  </nav>
+  <div class="main"><div class="page">
+
+    <!-- ── Page Hero ── -->
+    <div class="page-hero">
+      <h1>Memory Evolution Pipeline</h1>
+      <p>A self-improving memory system inspired by Meta's HyperAgents research. Traces become episodes, episodes yield knowledge, knowledge drives better performance &mdash; an autonomous quality loop that gets smarter with every run.</p>
+    </div>
+
+    <!-- ── Overview ── -->
+    <section>
+      <h2>Overview</h2>
+      <div class="card">
+        <p class="prose">The Memory Evolution Pipeline transforms raw agent execution traces into structured, actionable knowledge. Rather than treating memory as a static store, Maximus treats it as a living system that continuously refines itself through a seven-stage pipeline. Each stage feeds into the next, creating a compounding improvement cycle where better data produces better decisions.</p>
+        <p class="prose" style="margin-top: 14px;">Inspired by Meta's HyperAgents paper on self-improving agent architectures, the pipeline combines deterministic heuristics with LLM-powered extraction to build an ever-growing knowledge graph that agents draw on at execution time.</p>
+      </div>
+    </section>
+
+    <!-- ── Pipeline Architecture ── -->
+    <section>
+      <h2>Pipeline Architecture <span class="tag">7 Stages</span></h2>
+      <p class="prose" style="margin-bottom: 20px;">The pipeline runs as a periodic background process, processing completed traces through each stage in sequence.</p>
+
+      <div class="component-item">
+        <div class="component-name"><span class="pill pill-gold">1</span> &nbsp;Scan &amp; Distill</div>
+        <p class="prose-sm">Scans for completed execution traces and distills them into compact episode summaries. Raw traces can be thousands of lines; distillation extracts the essential decisions, outcomes, and context into a structured episode record.</p>
+      </div>
+
+      <div class="component-item green">
+        <div class="component-name"><span class="pill pill-green">2</span> &nbsp;Metrics Collection</div>
+        <p class="prose-sm">Computes quality metrics for each episode: token counts, tool call frequencies, success/failure ratios, and execution duration. These metrics feed the promotion engine and help identify high-value episodes worth deeper extraction.</p>
+      </div>
+
+      <div class="component-item amber">
+        <div class="component-name"><span class="pill pill-amber">3</span> &nbsp;Entity &amp; Triple Extraction</div>
+        <p class="prose-sm">LLM-powered extraction identifies entities (tools, APIs, strategies, error patterns) and relationships (triples) from episode summaries. Extracted knowledge is stored in the knowledge graph as nodes and edges with provenance tracking.</p>
+      </div>
+
+      <div class="component-item blue">
+        <div class="component-name"><span class="pill pill-blue">4</span> &nbsp;Promotion</div>
+        <p class="prose-sm">Metric-driven promotion decides which episodes graduate from working memory into long-term knowledge. High performers are promoted quickly; low performers are held back for further evidence before committing to the graph.</p>
+      </div>
+
+      <div class="component-item">
+        <div class="component-name"><span class="pill pill-gold">5</span> &nbsp;Briefing Generation</div>
+        <p class="prose-sm">Generates pre-execution briefings for agents by querying the knowledge graph for relevant context. Briefings include known strategies, common pitfalls, and domain-specific knowledge tailored to the upcoming task.</p>
+      </div>
+
+      <div class="component-item dim">
+        <div class="component-name"><span class="pill pill-dim">6</span> &nbsp;Data Pruning</div>
+        <p class="prose-sm">Removes stale or low-confidence knowledge from the graph. Entities and triples that haven't been reinforced by recent episodes decay over time, keeping the knowledge base lean and current.</p>
+      </div>
+
+      <div class="component-item danger">
+        <div class="component-name"><span class="pill pill-danger">7</span> &nbsp;Trace Pruning</div>
+        <p class="prose-sm">Archives or deletes raw trace files once their knowledge has been fully extracted and promoted. Prevents unbounded disk growth while preserving the distilled intelligence in the graph.</p>
+      </div>
+    </section>
+
+    <!-- ── The Quality Loop ── -->
+    <section>
+      <h2>The Quality Loop</h2>
+      <div class="card">
+        <p class="prose" style="margin-bottom: 20px;">The pipeline creates a self-reinforcing feedback loop. Each component's output improves the input quality of the next, producing compounding returns over time.</p>
+        <pre>
+Better traces
+    <span class="kw">-&gt;</span> Better episodes
+        <span class="kw">-&gt;</span> Better knowledge
+            <span class="kw">-&gt;</span> Better briefings
+                <span class="kw">-&gt;</span> Better performance
+                    <span class="kw">-&gt;</span> Better traces  <span class="cm">// cycle repeats</span></pre>
+        <p class="prose-sm" style="margin-top: 14px;">As agents perform better with improved briefings, the traces they produce contain richer decision-making data, which in turn yields higher-quality episodes and knowledge extractions. This virtuous cycle means the system improves autonomously with each execution.</p>
+      </div>
+    </section>
+
+    <!-- ── Extraction Evolution ── -->
+    <section>
+      <h2>Extraction Evolution &amp; Prompt Versioning</h2>
+      <p class="prose" style="margin-bottom: 20px;">Extraction prompts evolve over time. Each version is tracked by its SHA-256 hash, enabling A/B comparisons and rollback when quality regresses.</p>
+
+      <div class="card" style="margin-bottom: 14px;">
+        <h3>SHA-256 Prompt Hashing</h3>
+        <p class="prose-sm" style="margin-bottom: 14px;">Every extraction prompt is hashed before use. The hash is stored alongside each extraction result, creating an immutable audit trail linking every piece of extracted knowledge back to the exact prompt that produced it.</p>
+        <pre>
+<span class="cm">// Prompt version tracking</span>
+prompt_hash  = <span class="fn">sha256</span>(<span class="str">"Extract entities and triples from..."</span>)
+              <span class="cm">// e.g. "a3f8c1d2..."</span>
+
+<span class="cm">// Stored with every extraction</span>
+extraction_record = {
+  episode_id:   <span class="str">"ep-20260327-001"</span>,
+  prompt_hash:  <span class="str">"a3f8c1d2..."</span>,
+  entities:     [...],
+  triples:      [...]
+}</pre>
+      </div>
+
+      <div class="card">
+        <h3>Quality Metrics</h3>
+        <p class="prose-sm" style="margin-bottom: 14px;">The <code>extraction_metrics</code> table tracks per-prompt-version performance, enabling data-driven prompt evolution.</p>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Description</th>
+                <th>Target</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Entities per Episode</strong></td>
+                <td>Average number of unique entities extracted from each episode summary</td>
+                <td><code>&gt;= 5</code></td>
+              </tr>
+              <tr>
+                <td><strong>Triples per Episode</strong></td>
+                <td>Average number of relationship triples (subject-predicate-object) per episode</td>
+                <td><code>&gt;= 8</code></td>
+              </tr>
+              <tr>
+                <td><strong>Unique Entity Ratio</strong></td>
+                <td>Proportion of extracted entities that are genuinely new vs. duplicates of existing graph nodes</td>
+                <td><code>&gt;= 0.3</code></td>
+              </tr>
+              <tr>
+                <td><strong>Triple Confidence</strong></td>
+                <td>Average confidence score assigned to extracted triples by the LLM</td>
+                <td><code>&gt;= 0.7</code></td>
+              </tr>
+              <tr>
+                <td><strong>Extraction Latency</strong></td>
+                <td>Wall-clock time for a single episode extraction pass</td>
+                <td><code>&lt; 30s</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Metric-Driven Promotion ── -->
+    <section>
+      <h2>Metric-Driven Promotion</h2>
+      <p class="prose" style="margin-bottom: 20px;">Not all episodes are created equal. The promotion engine uses quality scores to decide which episodes earn a place in long-term knowledge.</p>
+
+      <div class="card-grid">
+        <div class="card-sm">
+          <div class="label">High Performers</div>
+          <div class="value"><span class="pill pill-green" style="margin-bottom: 6px;">Score &gt; 80%</span><br>Promoted immediately to the knowledge graph. Their entities and triples are merged with high confidence, and the source episode is flagged as a reference exemplar.</div>
+        </div>
+        <div class="card-sm">
+          <div class="label">Mid-Range</div>
+          <div class="value"><span class="pill pill-amber" style="margin-bottom: 6px;">Score 30-80%</span><br>Held in a staging area. Knowledge is tentatively added with lower confidence weights. Requires corroboration from additional episodes before full promotion.</div>
+        </div>
+        <div class="card-sm">
+          <div class="label">Low Performers</div>
+          <div class="value"><span class="pill pill-danger" style="margin-bottom: 6px;">Score &lt; 30%</span><br>Held back entirely. Episodes with low quality scores may contain hallucinated or irrelevant extractions. They remain in working memory and are candidates for re-extraction with improved prompts.</div>
+        </div>
+        <div class="card-sm">
+          <div class="label">Promotion Velocity</div>
+          <div class="value"><span class="pill pill-blue" style="margin-bottom: 6px;">Adaptive</span><br>The promotion threshold adapts based on overall graph quality. As the graph matures, the bar rises to prevent dilution of high-quality knowledge with marginal additions.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Strategy Discovery ── -->
+    <section>
+      <h2>Strategy Discovery</h2>
+      <p class="prose" style="margin-bottom: 20px;">As the pipeline processes traces, it identifies recurring patterns of successful behavior and codifies them as named strategies. These strategies become first-class entities in the knowledge graph.</p>
+
+      <div class="card" style="margin-bottom: 14px;">
+        <h3>Discovered Strategy Examples</h3>
+        <div style="margin-top: 14px;">
+          <div class="component-item">
+            <div class="component-name">set-leverage-before-orders</div>
+            <p class="prose-sm">When trading, always configure account leverage before placing any orders. Prevents rejection errors and ensures correct position sizing across different margin requirements.</p>
+          </div>
+          <div class="component-item green">
+            <div class="component-name">use-jina-for-protected-sites</div>
+            <p class="prose-sm">When scraping content from sites with bot protection (Cloudflare, rate limits), route requests through Jina reader API instead of direct fetch. Higher success rate and cleaner output.</p>
+          </div>
+          <div class="component-item blue">
+            <div class="component-name">batch-upload-over-50-leads</div>
+            <p class="prose-sm">When importing more than 50 leads into a campaign, use the bulk upload API endpoint instead of individual create calls. Reduces API calls by 10-100x and avoids rate limiting.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Strategy Registry</h3>
+        <p class="prose-sm" style="margin-bottom: 14px;">Discovered strategies are tracked in a SQLite registry that records usage counts, success rates, and agent affinity. The registry enables data-driven strategy recommendations in briefings.</p>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>strategy_id</code></td>
+                <td><code>TEXT PK</code></td>
+                <td>Kebab-case identifier (e.g. <code>set-leverage-before-orders</code>)</td>
+              </tr>
+              <tr>
+                <td><code>description</code></td>
+                <td><code>TEXT</code></td>
+                <td>Human-readable summary of the strategy</td>
+              </tr>
+              <tr>
+                <td><code>usage_count</code></td>
+                <td><code>INTEGER</code></td>
+                <td>Number of times the strategy has been applied</td>
+              </tr>
+              <tr>
+                <td><code>success_rate</code></td>
+                <td><code>REAL</code></td>
+                <td>Ratio of successful outcomes when strategy was used</td>
+              </tr>
+              <tr>
+                <td><code>agent_id</code></td>
+                <td><code>TEXT</code></td>
+                <td>Agent that discovered or most frequently uses this strategy</td>
+              </tr>
+              <tr>
+                <td><code>discovered_at</code></td>
+                <td><code>DATETIME</code></td>
+                <td>Timestamp of first observation</td>
+              </tr>
+              <tr>
+                <td><code>last_used_at</code></td>
+                <td><code>DATETIME</code></td>
+                <td>Timestamp of most recent application</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Future Directions ── -->
+    <section>
+      <h2>Future Directions</h2>
+      <div class="card-grid">
+        <div class="card-sm">
+          <div class="label">Automated Prompt Evolution</div>
+          <div class="value">Use extraction quality metrics to automatically generate and test new prompt variants, selecting the best performers through A/B testing against the metrics table.</div>
+        </div>
+        <div class="card-sm">
+          <div class="label">Vector Embeddings</div>
+          <div class="value">Augment the knowledge graph with vector embeddings for semantic similarity search. Enable agents to find relevant knowledge even when exact entity names differ.</div>
+        </div>
+        <div class="card-sm">
+          <div class="label">LLM Distiller</div>
+          <div class="value">Replace rule-based trace distillation with an LLM-powered distiller that can extract nuanced reasoning chains and implicit decision patterns from raw execution logs.</div>
+        </div>
+        <div class="card-sm">
+          <div class="label">Cross-Swarm Knowledge</div>
+          <div class="value">Share strategies and knowledge across independent agent swarms. A trading agent's risk management strategies could inform a deployment agent's rollback decisions.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Footer ── -->
+    <footer>
+      <p>Maximus Documentation &mdash; <a href="https://github.com/maximus">GitHub</a></p>
+    </footer>
+
+  </div></div>
+</div>
+</body>
+</html>

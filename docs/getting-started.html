@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started — Maximus</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="layout">
+  <button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
+  <nav class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><style>.bg{fill:#0b0b0b}.hex{stroke:#C4851A;fill:none;stroke-width:.5}.m{stroke:#E8A422;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.node{fill:#C4851A}.node-bright{fill:#E8A422}</style></defs><rect class="bg" width="32" height="32" rx="7"/><line class="hex" x1="16" y1="2.5" x2="27.5" y2="9"/><line class="hex" x1="27.5" y1="11" x2="27.5" y2="21"/><line class="hex" x1="27.5" y1="23" x2="16" y2="29.5"/><line class="hex" x1="4.5" y1="23" x2="16" y2="29.5"/><line class="hex" x1="4.5" y1="11" x2="4.5" y2="21"/><line class="hex" x1="4.5" y1="9" x2="16" y2="2.5"/><circle class="node-bright" cx="16" cy="2.5" r="1.1"/><circle class="node" cx="27.5" cy="10" r="1.1"/><circle class="node" cx="27.5" cy="22" r="1.1"/><circle class="node" cx="16" cy="29.5" r="1.1"/><circle class="node" cx="4.5" cy="22" r="1.1"/><circle class="node" cx="4.5" cy="10" r="1.1"/><polyline class="m" points="7,23 7,9 16,17 25,9 25,23"/><circle class="node-bright" cx="7" cy="23" r="1.4"/><circle class="node-bright" cx="25" cy="23" r="1.4"/><circle class="node-bright" cx="16" cy="17" r="1.6"/></svg>
+      <span>Maximus</span>
+    </a>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Getting Started</div>
+      <a href="index.html">Overview</a>
+      <a href="getting-started.html" class="active">Quick Start</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Core Concepts</div>
+      <a href="agent-definition.html">Agent Definitions</a>
+      <a href="skill-definition.html">Skill Definitions</a>
+      <a href="credential-vault.html">Credential Vault</a>
+      <a href="multi-agent.html">Multi-Agent Coordination</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Systems</div>
+      <a href="knowledge-graph.html">Knowledge Graph</a>
+      <a href="memory-evolution.html">Memory Evolution</a>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+  </nav>
+  <div class="main">
+    <div class="page">
+
+      <!-- Page Hero -->
+      <div class="page-hero">
+        <h1>Getting Started with Maximus</h1>
+        <p>Step-by-step guide from installation to running your first agent team with the Mission Control dashboard.</p>
+      </div>
+
+      <!-- Prerequisites -->
+      <section>
+        <h2>Prerequisites</h2>
+        <div class="card">
+          <div class="prose">
+            <ul>
+              <li><strong>Node.js 22+</strong> (LTS recommended)</li>
+              <li><strong>pnpm 10+</strong> &mdash; install globally with <code>npm install -g pnpm</code></li>
+              <li><strong>A Claude API key</strong> from <a href="https://console.anthropic.com" style="color:var(--gold);text-decoration:none;">console.anthropic.com</a> or a Claude Agent SDK OAuth token</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Installation -->
+      <section>
+        <h2>Installation</h2>
+        <pre><span class="kw">git clone</span> https://github.com/sancag/maximus.git
+<span class="kw">cd</span> maximus
+<span class="kw">pnpm</span> install
+<span class="kw">pnpm</span> build</pre>
+        <p class="prose-sm">The <code>pnpm install</code> step installs dependencies across all workspace packages. The <code>pnpm build</code> step compiles shared types, core engine, vault, and server via Turborepo.</p>
+      </section>
+
+      <!-- Project Structure -->
+      <section>
+        <h2>Project Structure <span class="tag">7 packages</span></h2>
+        <p class="prose-sm" style="margin-bottom:16px;">Maximus is a pnpm monorepo with seven packages:</p>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table>
+            <thead>
+              <tr>
+                <th>Package</th>
+                <th>Path</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>@maximus/shared</code></td>
+                <td><code>packages/shared</code></td>
+                <td>Shared TypeScript types and Zod schemas</td>
+              </tr>
+              <tr>
+                <td><code>@maximus/core</code></td>
+                <td><code>packages/core</code></td>
+                <td>Agent runtime, skill loader, credential vault integration</td>
+              </tr>
+              <tr>
+                <td><code>@maximus/vault</code></td>
+                <td><code>packages/vault</code></td>
+                <td>Credential encryption utilities (AES-256-GCM)</td>
+              </tr>
+              <tr>
+                <td><code>@maximus/memory</code></td>
+                <td><code>packages/memory</code></td>
+                <td>Dual-DB engine (Kuzu + SQLite), trace-to-episode pipeline</td>
+              </tr>
+              <tr>
+                <td><code>@maximus/server</code></td>
+                <td><code>packages/server</code></td>
+                <td>REST API + WebSocket server (Express 5)</td>
+              </tr>
+              <tr>
+                <td><code>@maximus/dashboard</code></td>
+                <td><code>packages/dashboard</code></td>
+                <td>Mission Control web UI (Next.js + React 19)</td>
+              </tr>
+              <tr>
+                <td><code>@maximus/cli</code></td>
+                <td><code>packages/cli</code></td>
+                <td>Interactive TUI (Ink + React) and CLI</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Step 1 -->
+      <section>
+        <h2>Step 1: Initialize Your Project</h2>
+        <div class="card">
+          <pre style="margin-bottom:12px;"><span class="kw">maximus</span> init</pre>
+          <p class="prose-sm">The interactive wizard creates <code>~/.maximus/</code> with the full project structure. It prompts for your agent name, OAuth token, and vault key.</p>
+        </div>
+      </section>
+
+      <!-- Step 2 -->
+      <section>
+        <h2>Step 2: Configure Credentials</h2>
+        <div class="card">
+          <pre style="margin-bottom:12px;"><span class="kw">export</span> <span class="str">MAXIMUS_VAULT_KEY</span>=<span class="str">"your-secret-key-here"</span></pre>
+          <p class="prose-sm">The vault encrypts all stored credentials at rest using AES-256-GCM. Agents never have direct access to secrets &mdash; the tool executor resolves credentials from the vault at call time and sanitizes responses before returning them to the agent.</p>
+          <p class="prose-sm" style="margin-top:8px;">See <a href="credential-vault.html" style="color:var(--gold);text-decoration:none;">Credential Vault</a> for full documentation on storing and managing secrets.</p>
+        </div>
+      </section>
+
+      <!-- Step 3 -->
+      <section>
+        <h2>Step 3: Define Your First Agent</h2>
+        <div class="card">
+          <p class="prose-sm" style="margin-bottom:14px;">Create a Markdown file in <code>agents/</code> with YAML frontmatter for metadata and Markdown body for the system prompt:</p>
+          <pre><span class="cm">---</span>
+<span class="kw">name:</span> <span class="str">orchestrator</span>
+<span class="kw">description:</span> <span class="str">Main orchestrator that coordinates the team</span>
+<span class="kw">model:</span> <span class="str">sonnet</span>
+<span class="kw">maxTurns:</span> <span class="str">25</span>
+<span class="kw">skills:</span> []
+<span class="cm">---</span>
+
+You are the orchestrator. You manage a team of agents and delegate tasks
+to the appropriate team members based on their skills and roles.
+
+When given a goal, break it into subtasks and delegate each to the right agent.
+Report results back to the user as they complete.</pre>
+          <p class="prose-sm" style="margin-top:12px;">The <code>name</code> field is the unique identifier. The <code>model</code> field accepts <code>sonnet</code>, <code>opus</code>, or <code>haiku</code>. An agent without a <code>reportsTo</code> field is treated as the root orchestrator.</p>
+          <p class="prose-sm" style="margin-top:8px;">See <a href="agent-definition.html" style="color:var(--gold);text-decoration:none;">Agent Definition Format</a> for the full schema and all available fields.</p>
+        </div>
+      </section>
+
+      <!-- Step 4 -->
+      <section>
+        <h2>Step 4: Start the Server</h2>
+        <div class="card">
+          <pre style="margin-bottom:12px;"><span class="kw">cd</span> packages/server
+<span class="kw">pnpm</span> start</pre>
+          <p class="prose-sm" style="margin-bottom:16px;">The server starts on port <strong>4100</strong> and exposes:</p>
+          <div style="overflow:hidden;border-radius:10px;border:1px solid var(--border);">
+            <table>
+              <thead>
+                <tr>
+                  <th>Endpoint</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>http://localhost:4100/api/health</code></td>
+                  <td>Health check</td>
+                </tr>
+                <tr>
+                  <td><code>http://localhost:4100/api/agents</code></td>
+                  <td>Agent management</td>
+                </tr>
+                <tr>
+                  <td><code>http://localhost:4100/api/tasks</code></td>
+                  <td>Task management</td>
+                </tr>
+                <tr>
+                  <td><code>http://localhost:4100/api/agents/org-chart</code></td>
+                  <td>Agent hierarchy</td>
+                </tr>
+                <tr>
+                  <td><code>ws://localhost:4100/ws</code></td>
+                  <td>WebSocket event stream</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 5 -->
+      <section>
+        <h2>Step 5: Open the Dashboard</h2>
+        <div class="card">
+          <p class="prose-sm" style="margin-bottom:12px;">The dashboard is served from the same server on port <strong>4100</strong>. Open <a href="http://localhost:4100" style="color:var(--gold);text-decoration:none;">http://localhost:4100</a> in your browser.</p>
+        </div>
+      </section>
+
+      <!-- Step 6 -->
+      <section>
+        <h2>Step 6: Using the Dashboard</h2>
+        <div class="card">
+          <p class="prose-sm" style="margin-bottom:14px;">Once the server is running:</p>
+          <div class="step-list">
+            <div class="step-item">
+              <h4>Open the Dashboard</h4>
+              <p class="prose-sm">Navigate to <a href="http://localhost:4100" style="color:var(--gold);text-decoration:none;">http://localhost:4100</a> &mdash; you land on the <strong>Operations</strong> view (activity feed).</p>
+            </div>
+            <div class="step-item">
+              <h4>Check the Connection</h4>
+              <p class="prose-sm">A green dot in the top-right means the dashboard is connected to the server via WebSocket.</p>
+            </div>
+            <div class="step-item">
+              <h4>Open Chat</h4>
+              <p class="prose-sm">Click the Chat icon (speech bubble) in the sidebar to open the Chat view.</p>
+            </div>
+            <div class="step-item">
+              <h4>Send a Message</h4>
+              <p class="prose-sm">Type a message to your orchestrator agent and press Enter &mdash; the response streams in real-time via SSE.</p>
+            </div>
+            <div class="step-item">
+              <h4>Watch Operations</h4>
+              <p class="prose-sm">See real-time events as agents process work (tool calls, delegations, completions).</p>
+            </div>
+            <div class="step-item">
+              <h4>Explore Org Chart</h4>
+              <p class="prose-sm">Click the Org Chart icon (network) to see your agent hierarchy as a top-down tree.</p>
+            </div>
+            <div class="step-item">
+              <h4>Track Tasks</h4>
+              <p class="prose-sm">Click the Tasks icon (checklist) to track all task progress with sortable columns and status filters.</p>
+            </div>
+          </div>
+          <p class="prose-sm">See <a href="dashboard.html" style="color:var(--gold);text-decoration:none;">Dashboard Documentation</a> for detailed view descriptions, event type mappings, and connection handling.</p>
+        </div>
+      </section>
+
+      <!-- Multi-Agent Setup -->
+      <section>
+        <h2>Multi-Agent Setup</h2>
+        <p class="prose-sm" style="margin-bottom:16px;">To set up a hierarchy, define multiple agents with <code>reportsTo</code> fields:</p>
+
+        <div class="card-sm" style="margin-bottom:14px;">
+          <div class="label">Orchestrator (root &mdash; no reportsTo)</div>
+          <pre style="margin:0;"><span class="cm">---</span>
+<span class="kw">name:</span> <span class="str">orchestrator</span>
+<span class="kw">description:</span> <span class="str">Coordinates the team</span>
+<span class="kw">model:</span> <span class="str">sonnet</span>
+<span class="cm">---</span></pre>
+        </div>
+
+        <div class="card-sm" style="margin-bottom:14px;">
+          <div class="label">Manager (reports to orchestrator)</div>
+          <pre style="margin:0;"><span class="cm">---</span>
+<span class="kw">name:</span> <span class="str">research-manager</span>
+<span class="kw">description:</span> <span class="str">Manages research tasks</span>
+<span class="kw">model:</span> <span class="str">sonnet</span>
+<span class="kw">reportsTo:</span> <span class="str">orchestrator</span>
+<span class="cm">---</span></pre>
+        </div>
+
+        <div class="card-sm" style="margin-bottom:14px;">
+          <div class="label">Worker (reports to manager)</div>
+          <pre style="margin:0;"><span class="cm">---</span>
+<span class="kw">name:</span> <span class="str">web-researcher</span>
+<span class="kw">description:</span> <span class="str">Searches the web for information</span>
+<span class="kw">model:</span> <span class="str">haiku</span>
+<span class="kw">reportsTo:</span> <span class="str">research-manager</span>
+<span class="kw">skills:</span>
+  - <span class="str">web-search</span>
+<span class="cm">---</span></pre>
+        </div>
+
+        <p class="prose-sm">Delegation is code-enforced: agents can only delegate to their direct reports, and the runtime validates hierarchy before spawning child work.</p>
+        <p class="prose-sm" style="margin-top:8px;">See <a href="multi-agent.html" style="color:var(--gold);text-decoration:none;">Multi-Agent Coordination</a> for delegation patterns, task lifecycle, safety mechanisms, and the full API reference.</p>
+      </section>
+
+      <!-- Memory System -->
+      <section>
+        <h2>Memory System</h2>
+        <p class="prose-sm" style="margin-bottom:16px;">Maximus agents can accumulate structured memory from their sessions. The memory system uses a dual database: Kuzu graph database for knowledge relationships and SQLite for episodes and metrics.</p>
+
+        <h3>Enabling Agent Memory</h3>
+        <p class="prose-sm" style="margin-bottom:14px;">Add a <code>memory:</code> block to any agent's frontmatter:</p>
+        <pre><span class="cm">---</span>
+<span class="kw">name:</span> <span class="str">researcher</span>
+<span class="kw">description:</span> <span class="str">Research specialist</span>
+<span class="kw">model:</span> <span class="str">sonnet</span>
+<span class="kw">memory:</span>
+  <span class="kw">episodic:</span> <span class="str">true</span>
+  <span class="kw">maxEpisodes:</span> <span class="str">50</span>
+  <span class="kw">knowledgeScopes:</span> []
+  <span class="kw">briefingEnabled:</span> <span class="str">true</span>
+  <span class="kw">briefingTokenBudget:</span> <span class="str">2000</span>
+  <span class="kw">learningRate:</span> <span class="str">moderate</span>
+<span class="cm">---</span></pre>
+
+        <div class="card" style="padding:0;overflow:hidden;margin-top:16px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>episodic</code></td>
+                <td>boolean</td>
+                <td><code>true</code></td>
+                <td>Capture episodes from sessions</td>
+              </tr>
+              <tr>
+                <td><code>maxEpisodes</code></td>
+                <td>number</td>
+                <td><code>50</code></td>
+                <td>Max episodes to retain per agent</td>
+              </tr>
+              <tr>
+                <td><code>knowledgeScopes</code></td>
+                <td>string[]</td>
+                <td><code>[]</code></td>
+                <td>Additional scopes to query</td>
+              </tr>
+              <tr>
+                <td><code>briefingEnabled</code></td>
+                <td>boolean</td>
+                <td><code>true</code></td>
+                <td>Inject briefings before sessions</td>
+              </tr>
+              <tr>
+                <td><code>briefingTokenBudget</code></td>
+                <td>number</td>
+                <td><code>2000</code></td>
+                <td>Max chars for briefing content</td>
+              </tr>
+              <tr>
+                <td><code>learningRate</code></td>
+                <td>string</td>
+                <td><code>moderate</code></td>
+                <td>conservative, moderate, or aggressive</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Deep Sleep Consolidation</h3>
+        <p class="prose-sm" style="margin-bottom:12px;">The deep sleep pipeline runs on a cron schedule (default: 3 AM daily) and performs:</p>
+        <div class="card">
+          <div class="step-list">
+            <div class="step-item">
+              <h4>Trace Analysis</h4>
+              <p class="prose-sm">Trace analysis and episode distillation</p>
+            </div>
+            <div class="step-item">
+              <h4>Entity Extraction</h4>
+              <p class="prose-sm">Entity extraction into the knowledge graph</p>
+            </div>
+            <div class="step-item">
+              <h4>Briefing Generation</h4>
+              <p class="prose-sm">Briefing generation for each agent</p>
+            </div>
+            <div class="step-item">
+              <h4>Stale Knowledge Pruning</h4>
+              <p class="prose-sm">Stale knowledge pruning</p>
+            </div>
+            <div class="step-item">
+              <h4>Scope Promotion</h4>
+              <p class="prose-sm">Scope promotion of high-value facts</p>
+            </div>
+          </div>
+        </div>
+        <p class="prose-sm" style="margin-top:12px;">Set the schedule with the <code>MAXIMUS_DEEP_SLEEP_SCHEDULE</code> environment variable (cron syntax).</p>
+
+        <h3>Performance Trends</h3>
+        <p class="prose-sm">Agents with memory enabled automatically receive performance trends in their session briefings. These trends show success rate direction (UP/DOWN/STABLE), cost patterns, and failure concentration over a 7-day sliding window. No configuration needed &mdash; if <code>briefingEnabled: true</code>, trends are included.</p>
+
+        <h3>Knowledge Scopes</h3>
+        <p class="prose-sm" style="margin-bottom:14px;">Knowledge is organized in three scope levels:</p>
+        <div class="card-grid three">
+          <div class="card-sm">
+            <div class="label">Agent</div>
+            <div class="value">Private to one agent</div>
+          </div>
+          <div class="card-sm">
+            <div class="label">Team</div>
+            <div class="value">Shared among agents with the same <code>reportsTo</code></div>
+          </div>
+          <div class="card-sm">
+            <div class="label">Global</div>
+            <div class="value">Available to all agents</div>
+          </div>
+        </div>
+        <p class="prose-sm" style="margin-top:12px;">Facts are automatically promoted up the scope hierarchy during deep sleep based on retrieval frequency and cross-agent relevance.</p>
+      </section>
+
+      <!-- CLI Commands -->
+      <section>
+        <h2>CLI Commands</h2>
+        <pre><span class="cm"># Initialize project</span>
+<span class="kw">maximus</span> init
+
+<span class="cm"># Check system health</span>
+<span class="kw">maximus</span> doctor
+
+<span class="cm"># Server management</span>
+<span class="kw">maximus</span> server start
+<span class="kw">maximus</span> server stop
+
+<span class="cm"># Interactive chat</span>
+<span class="kw">maximus</span> chat
+
+<span class="cm"># Vault management</span>
+<span class="kw">maximus</span> vault
+
+<span class="cm"># Memory commands</span>
+<span class="kw">maximus</span> memory status
+<span class="kw">maximus</span> memory inspect <span class="str">&lt;agent-name&gt;</span>
+<span class="kw">maximus</span> memory promote <span class="str">&lt;sourceId&gt;</span> <span class="str">&lt;predicate&gt;</span> <span class="str">&lt;targetId&gt;</span>
+<span class="kw">maximus</span> memory re-extract
+<span class="kw">maximus</span> memory reset</pre>
+      </section>
+
+      <!-- Troubleshooting -->
+      <section>
+        <h2>Troubleshooting</h2>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table>
+            <thead>
+              <tr>
+                <th>Problem</th>
+                <th>Solution</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Dashboard shows "Reconnecting to server..."</strong></td>
+                <td>Ensure the server is running on port 4100. The dashboard auto-reconnects with exponential backoff.</td>
+              </tr>
+              <tr>
+                <td><strong>No agents appear in Org Chart</strong></td>
+                <td>Ensure agent definition files are loaded by the server and registered via the API.</td>
+              </tr>
+              <tr>
+                <td><strong>Build errors</strong></td>
+                <td>Run <code>pnpm install && pnpm build</code> from the repository root to rebuild all packages.</td>
+              </tr>
+              <tr>
+                <td><strong>WebSocket not connecting</strong></td>
+                <td>Check that <code>NEXT_PUBLIC_WS_URL</code> is set correctly (default: <code>ws://localhost:4100/ws</code>).</td>
+              </tr>
+              <tr>
+                <td><strong>Chat messages not streaming</strong></td>
+                <td>Verify the server's <code>/api/chat</code> endpoint is reachable and the orchestrator agent is registered.</td>
+              </tr>
+              <tr>
+                <td><strong>Port conflicts</strong></td>
+                <td>The server defaults to port 4100. Set <code>PORT</code> environment variable to use a different port.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Next Steps -->
+      <section>
+        <h2>Next Steps</h2>
+        <div class="doc-grid">
+          <a href="dashboard.html" class="doc-link">
+            <div class="doc-title">Dashboard Documentation</div>
+            <div class="doc-desc">Detailed view descriptions, event types, and connection handling</div>
+          </a>
+          <a href="agent-definition.html" class="doc-link">
+            <div class="doc-title">Agent Definition Format</div>
+            <div class="doc-desc">Full agent configuration schema and options</div>
+          </a>
+          <a href="skill-definition.html" class="doc-link">
+            <div class="doc-title">Skill Definition Format</div>
+            <div class="doc-desc">Tool definitions, parameters, and credential binding</div>
+          </a>
+          <a href="credential-vault.html" class="doc-link">
+            <div class="doc-title">Credential Vault</div>
+            <div class="doc-desc">Encrypting and managing secrets</div>
+          </a>
+          <a href="multi-agent.html" class="doc-link">
+            <div class="doc-title">Multi-Agent Coordination</div>
+            <div class="doc-desc">Hierarchies, delegation, task lifecycle, and observability</div>
+          </a>
+          <a href="knowledge-graph.html" class="doc-link">
+            <div class="doc-title">Knowledge Graph &amp; Agent Memory</div>
+            <div class="doc-desc">Entities, scope hierarchy, briefings, and deep sleep consolidation</div>
+          </a>
+        </div>
+      </section>
+
+      <footer>
+        Maximus &mdash; Multi-Agent Orchestration Framework &middot; <a href="https://github.com/sancag/maximus">GitHub</a>
+      </footer>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

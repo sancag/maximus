@@ -15,8 +15,7 @@
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> &middot;
-  <a href="docs/index.html">Full Documentation</a> &middot;
-  <a href="docs/knowledge-graph.html">Knowledge Graph</a>
+  <a href="https://sancag.github.io/maximus/">Documentation</a>
 </p>
 
 ---
@@ -74,7 +73,7 @@ Seven packages in a pnpm monorepo:
 ### Install & Initialize
 
 ```bash
-git clone https://github.com/chrisgscott/maximus.git
+git clone https://github.com/sancag/maximus.git
 cd maximus
 pnpm install && pnpm build
 
