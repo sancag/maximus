@@ -1,0 +1,23 @@
+{
+	"name": "@maximus/root",
+	"private": true,
+	"type": "module",
+	"packageManager": "pnpm@10.32.1",
+	"scripts": {
+		"build": "turbo build",
+		"test": "turbo test",
+		"lint": "biome check .",
+		"format": "biome format --write .",
+		"start:prod": "turbo build && tsx packages/server/src/main.ts"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.8",
+		"@types/node": "^22",
+		"playwright": "^1.58.2",
+		"tsup": "^8.5.1",
+		"tsx": "^4.21.0",
+		"turbo": "^2.8.20",
+		"typescript": "^5.7",
+		"vitest": "^4.1.0"
+	}
+}

@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Graph & Agent Memory — Maximus</title>
+<style>
+  :root {
+    --bg:           #06060a;
+    --dominant:     #0a0a0f;
+    --surface:      #111118;
+    --elevated:     #1a1a24;
+    --border:       #222233;
+    --border-dim:   #1a1a28;
+
+    --gold:         #d4a020;
+    --gold-bright:  #f0c040;
+    --gold-dim:     #8a6a10;
+    --gold-ring:    rgba(212,160,32,0.08);
+    --amber:        #ff9800;
+    --orange-dark:  #e65100;
+
+    --success:      #00ff88;
+    --warn:         #ffaa00;
+    --danger:       #ff4466;
+
+    --text:         #e0e0e8;
+    --text-sec:     #8888a0;
+    --text-dim:     #555570;
+
+    --glow:         0 0 12px rgba(212,160,32,0.3);
+    --glow-strong:  0 0 24px rgba(212,160,32,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 52px 24px;
+  }
+
+  .page { max-width: 880px; margin: 0 auto; }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    padding: 56px 40px 52px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(212,160,32,0.1) 0%, transparent 65%),
+                var(--surface);
+    border: 1px solid rgba(212,160,32,0.25);
+    border-radius: 20px;
+    margin-bottom: 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(212,160,32,0.12);
+    border: 1px solid rgba(212,160,32,0.3);
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 4px 16px;
+    border-radius: 100px;
+    margin-bottom: 22px;
+  }
+  .hero h1 {
+    font-size: 46px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    background: linear-gradient(160deg, var(--gold-bright) 0%, var(--gold) 50%, var(--amber) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 18px;
+    line-height: 1.1;
+  }
+  .hero p {
+    color: var(--text-sec);
+    font-size: 16px;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  /* ── Section ── */
+  section { margin-bottom: 60px; }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+  }
+  h2 .tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: rgba(212,160,32,0.12);
+    color: var(--gold);
+    padding: 2px 10px;
+    border-radius: 100px;
+    border: 1px solid rgba(212,160,32,0.2);
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 14px;
+  }
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .card-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card-sm {
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .card-sm .label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 7px;
+  }
+  .card-sm .value { font-size: 13px; color: var(--text-sec); }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left;
+    padding: 10px 16px;
+    background: var(--elevated);
+    color: var(--text-dim);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border-dim);
+    color: var(--text-sec);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  td strong { color: var(--text); }
+  td code {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: 'SF Mono','Fira Code',monospace;
+    color: var(--gold);
+  }
+
+  /* ── Code ── */
+  pre {
+    background: var(--dominant);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    font-family: 'SF Mono','Fira Code','Consolas',monospace;
+    font-size: 12.5px;
+    color: #9090b0;
+    overflow-x: auto;
+    line-height: 1.65;
+  }
+  .kw  { color: var(--gold); }
+  .str { color: var(--success); }
+  .cm  { color: var(--text-dim); font-style: italic; }
+
+  /* ── Pills ── */
+  .pill {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 100px;
+    letter-spacing: 0.06em;
+  }
+  .pill-gold   { background: rgba(212,160,32,0.15);  color: var(--gold); border: 1px solid rgba(212,160,32,0.25); }
+  .pill-amber  { background: rgba(255,152,0,0.12);   color: var(--amber); border: 1px solid rgba(255,152,0,0.2); }
+  .pill-green  { background: rgba(0,255,136,0.1);    color: var(--success); border: 1px solid rgba(0,255,136,0.2); }
+  .pill-danger { background: rgba(255,68,102,0.1);   color: var(--danger); border: 1px solid rgba(255,68,102,0.2); }
+  .pill-dim    { background: rgba(136,136,160,0.1);  color: var(--text-sec); border: 1px solid var(--border); }
+
+  footer {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 12px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ════════════════════════════════════════════
+       HERO
+  ════════════════════════════════════════════ -->
+  <div class="hero">
+    <div class="hero-badge">Maximus · Memory System</div>
+    <h1>Knowledge Graph<br>&amp; Agent Memory</h1>
+    <p>How Maximus agents accumulate structured knowledge across sessions, share it with teammates, and recall it automatically before the next task.</p>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       INTRO PROSE
+  ════════════════════════════════════════════ -->
+  <section>
+    <div class="card">
+      <p style="font-size:15px;color:var(--text);margin-bottom:16px;line-height:1.8;">Every Maximus agent starts each session with a blank context window. Without memory, an agent that spent two sessions learning how to reliably paginate a particular API will rediscover that same lesson in session three — and four, and five. The knowledge graph exists to solve this problem at the swarm level, not just for individual agents.</p>
+      <p style="font-size:14px;color:var(--text-sec);margin-bottom:16px;line-height:1.8;">The system has three jobs: <strong style="color:var(--text)">record</strong> what agents experience during sessions, <strong style="color:var(--text)">consolidate</strong> those experiences into a queryable knowledge graph overnight, and <strong style="color:var(--text)">inject</strong> the relevant slice of that graph back into each agent's system prompt before the next session. The agent doesn't need to know any of this is happening — it simply finds that it already knows things it hasn't been explicitly told.</p>
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;">Two storage backends work together. <strong style="color:var(--text)">Kuzu</strong> (an embedded graph database) holds entities and relationships — queryable via Cypher with scope-aware traversals. <strong style="color:var(--text)">SQLite</strong> holds episodes, cached briefings, and swarm metrics. Neither requires a server; both are file-local and open when the first memory-enabled agent starts.</p>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       PIPELINE OVERVIEW
+  ════════════════════════════════════════════ -->
+  <section>
+    <h2>Data Pipeline <span class="tag">Overview</span></h2>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;margin-bottom:12px;">The pipeline splits cleanly into two async phases. During a session, the runtime writes a JSONL trace file — every tool call, result, agent message, and the final outcome — but nothing is processed yet. Processing happens during <strong style="color:var(--text)">deep sleep consolidation</strong> (by default, 3 AM daily), so the overhead never touches live sessions.</p>
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;">The only synchronous step is pre-session injection: the runtime reads the pre-cached briefing from SQLite (a single fast read) and prepends it to the agent's system prompt. If no cache exists yet, this is a no-op.</p>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <svg viewBox="0 0 840 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <defs>
+          <marker id="a1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0,8 3,0 6" fill="#333350"/>
+          </marker>
+          <marker id="a2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0,8 3,0 6" fill="#d4a020"/>
+          </marker>
+          <filter id="glow-f">
+            <feGaussianBlur stdDeviation="4" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <radialGradient id="gold-grad" cx="50%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="rgba(212,160,32,0.18)"/>
+            <stop offset="100%" stop-color="rgba(212,160,32,0)"/>
+          </radialGradient>
+        </defs>
+
+        <rect width="840" height="320" fill="#06060a"/>
+        <!-- subtle grid -->
+        <pattern id="gp" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="0.5" cy="0.5" r="0.5" fill="#111120"/>
+        </pattern>
+        <rect width="840" height="320" fill="url(#gp)"/>
+
+        <!-- Background glow behind the flow -->
+        <rect x="60" y="40" width="720" height="240" rx="16" fill="url(#gold-grad)"/>
+
+        <!-- Lane labels -->
+        <text x="26" y="118" font-size="8" fill="#333350" font-family="monospace" font-weight="700" letter-spacing="2" transform="rotate(-90,26,118)">SESSION</text>
+        <text x="26" y="210" font-size="8" fill="#333350" font-family="monospace" font-weight="700" letter-spacing="2" transform="rotate(-90,26,210)">STORE</text>
+        <text x="26" y="292" font-size="8" fill="#333350" font-family="monospace" font-weight="700" letter-spacing="2" transform="rotate(-90,26,292)">OUTPUT</text>
+
+        <line x1="58" y1="155" x2="790" y2="155" stroke="#1a1a28" stroke-width="1"/>
+        <line x1="58" y1="243" x2="790" y2="243" stroke="#1a1a28" stroke-width="1"/>
+
+        <!-- ─── Nodes ─── -->
+
+        <!-- Session Traces -->
+        <rect x="68" y="75" width="116" height="52" rx="10" fill="#111118" stroke="#222233" stroke-width="1.5"/>
+        <text x="126" y="97" text-anchor="middle" font-size="12" font-weight="700" fill="#e0e0e8" font-family="sans-serif">Session</text>
+        <text x="126" y="113" text-anchor="middle" font-size="11" fill="#555570" font-family="sans-serif">Traces (JSONL)</text>
+
+        <!-- EpisodeDistiller -->
+        <rect x="238" y="75" width="128" height="52" rx="10" fill="#12100a" stroke="#d4a020" stroke-width="1.5" filter="url(#glow-f)"/>
+        <text x="302" y="96" text-anchor="middle" font-size="12" font-weight="700" fill="#d4a020" font-family="sans-serif">Episode</text>
+        <text x="302" y="112" text-anchor="middle" font-size="11" fill="#8a6a10" font-family="sans-serif">Distiller</text>
+
+        <!-- SQLite -->
+        <rect x="238" y="168" width="128" height="52" rx="10" fill="#0a100e" stroke="#00ff88" stroke-width="1.5"/>
+        <text x="302" y="188" text-anchor="middle" font-size="12" font-weight="700" fill="#00ff88" font-family="sans-serif">SQLite</text>
+        <text x="302" y="204" text-anchor="middle" font-size="10" fill="#005533" font-family="sans-serif">Episodes · Briefings</text>
+
+        <!-- EntityExtractor -->
+        <rect x="424" y="168" width="128" height="52" rx="10" fill="#100a08" stroke="#ff9800" stroke-width="1.5"/>
+        <text x="488" y="188" text-anchor="middle" font-size="12" font-weight="700" fill="#ff9800" font-family="sans-serif">Entity</text>
+        <text x="488" y="204" text-anchor="middle" font-size="10" fill="#7a4400" font-family="sans-serif">Extractor (Haiku)</text>
+
+        <!-- Kuzu -->
+        <rect x="612" y="168" width="116" height="52" rx="10" fill="#0f0a00" stroke="#d4a020" stroke-width="1.5" filter="url(#glow-f)"/>
+        <text x="670" y="188" text-anchor="middle" font-size="12" font-weight="700" fill="#f0c040" font-family="sans-serif">Kuzu</text>
+        <text x="670" y="204" text-anchor="middle" font-size="10" fill="#8a6a10" font-family="sans-serif">Knowledge Graph</text>
+
+        <!-- BriefingGenerator -->
+        <rect x="612" y="75" width="116" height="52" rx="10" fill="#0a100e" stroke="#00ff88" stroke-width="1.5"/>
+        <text x="670" y="96" text-anchor="middle" font-size="12" font-weight="700" fill="#00ff88" font-family="sans-serif">Briefing</text>
+        <text x="670" y="112" text-anchor="middle" font-size="11" fill="#005533" font-family="sans-serif">Generator</text>
+
+        <!-- PromptInjector -->
+        <rect x="68" y="258" width="116" height="52" rx="10" fill="#12100a" stroke="#d4a020" stroke-width="2" filter="url(#glow-f)"/>
+        <text x="126" y="279" text-anchor="middle" font-size="12" font-weight="700" fill="#d4a020" font-family="sans-serif">Prompt</text>
+        <text x="126" y="295" text-anchor="middle" font-size="11" fill="#8a6a10" font-family="sans-serif">Injector</text>
+
+        <!-- System Prompt -->
+        <rect x="238" y="258" width="128" height="52" rx="10" fill="#111118" stroke="#333350" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="302" y="279" text-anchor="middle" font-size="12" font-weight="700" fill="#8888a0" font-family="sans-serif">System</text>
+        <text x="302" y="295" text-anchor="middle" font-size="11" fill="#555570" font-family="sans-serif">Prompt</text>
+
+        <!-- ─── Arrows ─── -->
+        <!-- Session → Distiller -->
+        <line x1="184" y1="101" x2="236" y2="101" stroke="#333350" stroke-width="1.5" marker-end="url(#a1)"/>
+        <!-- Distiller ↓ SQLite -->
+        <line x1="302" y1="127" x2="302" y2="166" stroke="#333350" stroke-width="1.5" marker-end="url(#a1)"/>
+        <!-- SQLite → EntityExtractor -->
+        <line x1="366" y1="194" x2="422" y2="194" stroke="#333350" stroke-width="1.5" marker-end="url(#a1)"/>
+        <!-- EntityExtractor → Kuzu -->
+        <line x1="552" y1="194" x2="610" y2="194" stroke="#333350" stroke-width="1.5" marker-end="url(#a1)"/>
+        <!-- Kuzu ↑ Briefing -->
+        <line x1="670" y1="168" x2="670" y2="129" stroke="#333350" stroke-width="1.5" marker-end="url(#a1)"/>
+        <!-- SQLite → Briefing (dashed arc) -->
+        <path d="M302 168 Q302 40 610 101" stroke="#333350" stroke-width="1.2" fill="none" marker-end="url(#a1)" stroke-dasharray="5,4"/>
+        <!-- Briefing → Injector (gold path) -->
+        <path d="M612 101 Q410 290 186 284" stroke="#d4a020" stroke-width="1.5" fill="none" marker-end="url(#a2)" opacity=".7"/>
+        <!-- Injector → System Prompt -->
+        <line x1="184" y1="284" x2="236" y2="284" stroke="#d4a020" stroke-width="1.5" marker-end="url(#a2)"/>
+
+        <!-- Step badges -->
+        <circle cx="210" cy="90" r="11" fill="#111118" stroke="#222233" stroke-width="1"/>
+        <text x="210" y="94" text-anchor="middle" font-size="10" fill="#555570" font-family="monospace" font-weight="700">1</text>
+
+        <circle cx="315" cy="150" r="11" fill="#111118" stroke="#222233" stroke-width="1"/>
+        <text x="315" y="154" text-anchor="middle" font-size="10" fill="#555570" font-family="monospace" font-weight="700">2</text>
+
+        <circle cx="395" cy="182" r="11" fill="#111118" stroke="#222233" stroke-width="1"/>
+        <text x="395" y="186" text-anchor="middle" font-size="10" fill="#555570" font-family="monospace" font-weight="700">3</text>
+
+        <circle cx="580" cy="182" r="11" fill="#111118" stroke="#222233" stroke-width="1"/>
+        <text x="580" y="186" text-anchor="middle" font-size="10" fill="#555570" font-family="monospace" font-weight="700">4</text>
+
+        <circle cx="683" cy="150" r="11" fill="#111118" stroke="#222233" stroke-width="1"/>
+        <text x="683" y="154" text-anchor="middle" font-size="10" fill="#555570" font-family="monospace" font-weight="700">5</text>
+
+        <circle cx="420" cy="240" r="11" fill="#12100a" stroke="#d4a020" stroke-width="1"/>
+        <text x="420" y="244" text-anchor="middle" font-size="10" fill="#d4a020" font-family="monospace" font-weight="700">6</text>
+
+        <!-- Legend -->
+        <rect x="450" y="268" width="136" height="40" rx="7" fill="#111118" stroke="#222233" stroke-width="1"/>
+        <line x1="462" y1="281" x2="476" y2="281" stroke="#333350" stroke-width="1.5" stroke-dasharray="4,2"/>
+        <text x="482" y="285" font-size="10" fill="#555570" font-family="sans-serif">consolidation (async)</text>
+        <line x1="462" y1="297" x2="476" y2="297" stroke="#d4a020" stroke-width="1.5"/>
+        <text x="482" y="301" font-size="10" fill="#d4a020" font-family="sans-serif">pre-session injection</text>
+      </svg>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       COMPONENTS TABLE
+  ════════════════════════════════════════════ -->
+  <section>
+    <h2>Architecture <span class="tag">Components</span></h2>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;margin-bottom:16px;">Six components do the work, each with a single responsibility. Three run during consolidation, two serve live sessions, and one tracks swarm-level signals.</p>
+
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <div style="border-left:3px solid var(--gold);padding-left:16px;">
+          <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:4px;font-family:'SF Mono','Fira Code',monospace;">EpisodeDistiller</div>
+          <p style="font-size:13px;color:var(--text-sec);line-height:1.75;margin:0;">Reads raw JSONL trace files and extracts three things from each session: a concise summary of what happened, the outcome (<code>success</code> / <code>failure</code> / <code>partial</code> from the <code>session:end</code> event), and a list of lessons. Lessons come from scanning error patterns, retry sequences, and terminal states — a 429 followed by a successful backoff becomes "rate limit encountered; exponential backoff resolved it." No LLM is involved; this step is pure parsing and SQL writes.</p>
+        </div>
+
+        <div style="border-left:3px solid var(--amber);padding-left:16px;">
+          <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:4px;font-family:'SF Mono','Fira Code',monospace;">EntityExtractor</div>
+          <p style="font-size:13px;color:var(--text-sec);line-height:1.75;margin:0;">Batches new episodes and sends them to Claude Haiku in parallel requests. Haiku returns a structured JSON list of entities (name, type, attributes) and triples (source → predicate → target, confidence). Haiku is used deliberately over a larger model: entity extraction is a well-structured, schema-constrained task, the volume can be high, and costs scale with session activity. Direct assertions score 0.9–1.0; inferences score lower. Entities are deduplicated by name; attributes are merged if the entity already exists.</p>
+        </div>
+
+        <div style="border-left:3px solid var(--gold);padding-left:16px;">
+          <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:4px;font-family:'SF Mono','Fira Code',monospace;">KnowledgeStore</div>
+          <p style="font-size:13px;color:var(--text-sec);line-height:1.75;margin:0;">The typed read/write interface to the Kuzu graph. Translates scope queries into Cypher <code>WHERE</code> clauses and filters active-only facts via <code>validTo IS NULL</code>. You can also pass raw Cypher strings for ad-hoc queries. All writes go through KnowledgeStore to ensure the temporal supersession protocol is applied consistently.</p>
+        </div>
+
+        <div style="border-left:3px solid var(--success);padding-left:16px;">
+          <div style="font-size:13px;font-weight:700;color:var(--success);margin-bottom:4px;font-family:'SF Mono','Fira Code',monospace;">BriefingGenerator</div>
+          <p style="font-size:13px;color:var(--text-sec);line-height:1.75;margin:0;">Queries Kuzu and SQLite, assembles a prioritized markdown briefing within the <code>briefingTokenBudget</code> character limit, and writes the result to the SQLite cache. Priority order: failure lessons first (most actionable), then high-confidence graph facts, then successful strategies. When content exceeds the budget, strategies are trimmed before knowledge, and knowledge is trimmed before lessons — so the most critical information always fits. The cache is invalidated whenever a new episode or triple arrives for that agent.</p>
+        </div>
+
+        <div style="border-left:3px solid var(--gold);padding-left:16px;">
+          <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:4px;font-family:'SF Mono','Fira Code',monospace;">PromptInjector</div>
+          <p style="font-size:13px;color:var(--text-sec);line-height:1.75;margin:0;">Runs synchronously at session start. Reads the cached briefing from SQLite and prepends it to the agent's system prompt with explicit delimiters and a header instructing the model not to treat the briefing as task instructions. Without the delimiter, the agent might interpret a past lesson like "always use Jina Reader" as a hard override rather than prior experience to draw on. If no briefing is cached, this component is a no-op and the session starts normally.</p>
+        </div>
+
+        <div style="border-left:3px solid var(--text-dim);padding-left:16px;">
+          <div style="font-size:13px;font-weight:700;color:var(--text-sec);margin-bottom:4px;font-family:'SF Mono','Fira Code',monospace;">SwarmMetrics</div>
+          <p style="font-size:13px;color:var(--text-sec);line-height:1.75;margin:0;">Tracks two cross-agent signals: knowledge utilization (how often entities and triples from the graph appear in briefings that the agent acted on) and delegation success rate (from <code>delegation:result</code> trace events, per delegator–delegatee pair). Utilization counts drive automatic scope promotion. Delegation rates surface in the dashboard as a signal for structural swarm problems — an orchestrator that repeatedly delegates to a failing agent will appear there.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table>
+        <thead>
+          <tr><th>Component</th><th>Role</th><th>Store</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>EpisodeDistiller</code></td>
+            <td>Converts raw session JSONL traces → structured episodes (what happened, outcome, lessons)</td>
+            <td><span class="pill pill-green">SQLite</span></td>
+          </tr>
+          <tr>
+            <td><code>EntityExtractor</code></td>
+            <td>Runs Claude Haiku over episodes to extract typed entities and relationship triples</td>
+            <td><span class="pill pill-gold">Kuzu</span></td>
+          </tr>
+          <tr>
+            <td><code>KnowledgeStore</code></td>
+            <td>CRUD on the Kuzu graph — entities, triples, Cypher queries, scope filtering</td>
+            <td><span class="pill pill-gold">Kuzu</span></td>
+          </tr>
+          <tr>
+            <td><code>BriefingGenerator</code></td>
+            <td>Assembles a markdown briefing from recent episodes + relevant graph facts, cached in SQLite</td>
+            <td><span class="pill pill-green">SQLite</span></td>
+          </tr>
+          <tr>
+            <td><code>PromptInjector</code></td>
+            <td>Prepends the cached briefing to the agent's system prompt before each session</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><code>SwarmMetrics</code></td>
+            <td>Tracks knowledge utilization and delegation success rates across all agents</td>
+            <td><span class="pill pill-green">SQLite</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       KNOWLEDGE GRAPH ILLUSTRATION
+  ════════════════════════════════════════════ -->
+  <section>
+    <h2>Knowledge Graph <span class="tag">Entities &amp; Triples</span></h2>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;margin-bottom:12px;">The graph is made up of two primitives: <strong style="color:var(--text)">entities</strong> (named nodes with a type and attributes) and <strong style="color:var(--text)">triples</strong> (directed edges: source → predicate → target). Every fact in the system is ultimately represented as a triple — the graph is not a document store or a key-value cache, it is a structured web of relationships that can be traversed with graph queries.</p>
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;">The diagram below shows a real scenario: a <code>web-researcher</code> agent discovered that the Instantly API has a 10 req/s rate limit, that a <code>pricing-scraper</code> agent depends on the Jina Reader API to bypass bot protection, and that direct fetches return 403 errors. Each of these is a separate triple in the graph — extractable, queryable, and scope-promotable independently.</p>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;">
+      <svg viewBox="0 0 840 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <defs>
+          <radialGradient id="ng" cx="50%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#1a1814"/>
+            <stop offset="100%" stop-color="#0d0d12"/>
+          </radialGradient>
+          <radialGradient id="ng2" cx="50%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#181818"/>
+            <stop offset="100%" stop-color="#0d0d12"/>
+          </radialGradient>
+          <marker id="ea" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+            <polygon points="0 0,7 2.5,0 5" fill="#333350"/>
+          </marker>
+          <marker id="ea-gold" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+            <polygon points="0 0,7 2.5,0 5" fill="#d4a020"/>
+          </marker>
+          <marker id="ea-green" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+            <polygon points="0 0,7 2.5,0 5" fill="#00ff88"/>
+          </marker>
+          <marker id="ea-amber" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+            <polygon points="0 0,7 2.5,0 5" fill="#ff9800"/>
+          </marker>
+          <filter id="ns" x="-35%" y="-35%" width="170%" height="170%">
+            <feDropShadow dx="0" dy="2" stdDeviation="8" flood-color="#000" flood-opacity="0.7"/>
+          </filter>
+          <filter id="gn">
+            <feGaussianBlur stdDeviation="5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <rect width="840" height="360" fill="#06060a"/>
+        <pattern id="gdots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
+          <circle cx="0.5" cy="0.5" r="0.5" fill="#111120"/>
+        </pattern>
+        <rect width="840" height="360" fill="url(#gdots)"/>
+
+        <!-- ─ Edges ─ -->
+
+        <!-- Instantly API →[rate_limit]→ Sending Ops -->
+        <line x1="195" y1="125" x2="445" y2="82" stroke="#d4a020" stroke-width="1.5" marker-end="url(#ea-gold)" opacity=".6"/>
+        <rect x="270" y="88" width="110" height="18" rx="4" fill="#0a0808" stroke="rgba(212,160,32,0.3)" stroke-width="1"/>
+        <text x="325" y="101" text-anchor="middle" font-size="9.5" fill="#d4a020" font-family="sans-serif" font-weight="600">rate_limit = 10/s</text>
+
+        <!-- Instantly API →[used_by]→ web-researcher -->
+        <line x1="195" y1="138" x2="352" y2="242" stroke="#333350" stroke-width="1.5" marker-end="url(#ea)" opacity=".6"/>
+        <rect x="222" y="190" width="66" height="18" rx="4" fill="#0a0a0f" stroke="#222233" stroke-width="1"/>
+        <text x="255" y="203" text-anchor="middle" font-size="9.5" fill="#555570" font-family="sans-serif">used_by</text>
+
+        <!-- pricing-scraper →[depends_on]→ Jina Reader -->
+        <line x1="540" y1="242" x2="648" y2="138" stroke="#00ff88" stroke-width="1.5" marker-end="url(#ea-green)" opacity=".6"/>
+        <rect x="556" y="182" width="90" height="18" rx="4" fill="#040f09" stroke="rgba(0,255,136,0.2)" stroke-width="1"/>
+        <text x="601" y="195" text-anchor="middle" font-size="9.5" fill="#00ff88" font-family="sans-serif" font-weight="600">depends_on</text>
+
+        <!-- Jina Reader →[bypasses]→ bot-403 -->
+        <line x1="682" y1="120" x2="706" y2="290" stroke="#ff9800" stroke-width="1.5" marker-end="url(#ea-amber)" opacity=".6"/>
+        <rect x="690" y="198" width="72" height="18" rx="4" fill="#0a0600" stroke="rgba(255,152,0,0.2)" stroke-width="1"/>
+        <text x="726" y="211" text-anchor="middle" font-size="9.5" fill="#ff9800" font-family="sans-serif" font-weight="600">bypasses</text>
+
+        <!-- web-researcher →[learned_about]→ pagination -->
+        <line x1="385" y1="262" x2="502" y2="308" stroke="#333350" stroke-width="1.5" marker-end="url(#ea)" opacity=".6"/>
+        <rect x="388" y="280" width="110" height="18" rx="4" fill="#0a0a0f" stroke="#222233" stroke-width="1"/>
+        <text x="443" y="293" text-anchor="middle" font-size="9.5" fill="#555570" font-family="sans-serif">learned_about</text>
+
+        <!-- ─ Nodes ─ -->
+
+        <!-- Instantly API -->
+        <circle cx="170" cy="128" r="48" fill="url(#ng)" stroke="#d4a020" stroke-width="2" filter="url(#ns)"/>
+        <circle cx="170" cy="128" r="48" fill="none" stroke="#d4a020" stroke-width="2" filter="url(#gn)" opacity=".3"/>
+        <text x="170" y="119" text-anchor="middle" font-size="8.5" fill="#8a6a10" font-family="sans-serif" font-weight="700" letter-spacing="1.5">API</text>
+        <text x="170" y="134" text-anchor="middle" font-size="13" font-weight="800" fill="#f0c040" font-family="sans-serif">Instantly</text>
+        <text x="170" y="150" text-anchor="middle" font-size="10" fill="#8a6a10" font-family="sans-serif">API</text>
+
+        <!-- Sending Ops -->
+        <circle cx="482" cy="76" r="40" fill="url(#ng2)" stroke="#333350" stroke-width="1.5" filter="url(#ns)"/>
+        <text x="482" y="68" text-anchor="middle" font-size="8" fill="#333350" font-family="sans-serif" font-weight="700" letter-spacing="1">CONCEPT</text>
+        <text x="482" y="83" text-anchor="middle" font-size="12" font-weight="700" fill="#8888a0" font-family="sans-serif">Sending</text>
+        <text x="482" y="97" text-anchor="middle" font-size="10" fill="#555570" font-family="sans-serif">Ops</text>
+
+        <!-- Jina Reader (tool) -->
+        <circle cx="672" cy="112" r="46" fill="url(#ng)" stroke="#00ff88" stroke-width="2" filter="url(#ns)"/>
+        <text x="672" y="103" text-anchor="middle" font-size="8.5" fill="#005533" font-family="sans-serif" font-weight="700" letter-spacing="1.5">TOOL</text>
+        <text x="672" y="118" text-anchor="middle" font-size="13" font-weight="800" fill="#00ff88" font-family="sans-serif">Jina</text>
+        <text x="672" y="133" text-anchor="middle" font-size="10" fill="#005533" font-family="sans-serif">Reader API</text>
+
+        <!-- web-researcher (agent) -->
+        <circle cx="360" cy="254" r="46" fill="url(#ng)" stroke="#ff9800" stroke-width="2" filter="url(#ns)"/>
+        <text x="360" y="244" text-anchor="middle" font-size="8.5" fill="#7a4400" font-family="sans-serif" font-weight="700" letter-spacing="1.5">AGENT</text>
+        <text x="360" y="259" text-anchor="middle" font-size="12" font-weight="700" fill="#e0e0e8" font-family="sans-serif">web-</text>
+        <text x="360" y="274" text-anchor="middle" font-size="12" font-weight="700" fill="#e0e0e8" font-family="sans-serif">researcher</text>
+
+        <!-- pricing-scraper (agent) -->
+        <circle cx="558" cy="254" r="46" fill="url(#ng)" stroke="#ff9800" stroke-width="2" filter="url(#ns)"/>
+        <text x="558" y="244" text-anchor="middle" font-size="8.5" fill="#7a4400" font-family="sans-serif" font-weight="700" letter-spacing="1.5">AGENT</text>
+        <text x="558" y="259" text-anchor="middle" font-size="12" font-weight="700" fill="#e0e0e8" font-family="sans-serif">pricing-</text>
+        <text x="558" y="274" text-anchor="middle" font-size="12" font-weight="700" fill="#e0e0e8" font-family="sans-serif">scraper</text>
+
+        <!-- pagination (concept) -->
+        <circle cx="530" cy="318" r="32" fill="url(#ng2)" stroke="#333350" stroke-width="1.5" filter="url(#ns)"/>
+        <text x="530" y="313" text-anchor="middle" font-size="8" fill="#333350" font-family="sans-serif" font-weight="700" letter-spacing="1">CONCEPT</text>
+        <text x="530" y="328" text-anchor="middle" font-size="10" font-weight="700" fill="#8888a0" font-family="sans-serif">pagination</text>
+
+        <!-- bot-403 (error) -->
+        <circle cx="720" cy="308" r="32" fill="url(#ng)" stroke="#ff4466" stroke-width="1.5" filter="url(#ns)"/>
+        <text x="720" y="301" text-anchor="middle" font-size="8" fill="#660022" font-family="sans-serif" font-weight="700" letter-spacing="1">ERROR</text>
+        <text x="720" y="317" text-anchor="middle" font-size="10" font-weight="700" fill="#ff4466" font-family="sans-serif">bot 403</text>
+
+        <!-- Legend -->
+        <rect x="16" y="290" width="138" height="58" rx="8" fill="#111118" stroke="#222233" stroke-width="1"/>
+        <circle cx="32" cy="307" r="5" fill="none" stroke="#d4a020" stroke-width="1.5"/>
+        <text x="44" y="311" font-size="10" fill="#555570" font-family="sans-serif">api node</text>
+        <circle cx="32" cy="323" r="5" fill="none" stroke="#ff9800" stroke-width="1.5"/>
+        <text x="44" y="327" font-size="10" fill="#555570" font-family="sans-serif">agent node</text>
+        <circle cx="90" cy="307" r="5" fill="none" stroke="#00ff88" stroke-width="1.5"/>
+        <text x="102" y="311" font-size="10" fill="#555570" font-family="sans-serif">tool</text>
+        <circle cx="90" cy="323" r="5" fill="none" stroke="#ff4466" stroke-width="1.5"/>
+        <text x="102" y="327" font-size="10" fill="#555570" font-family="sans-serif">error</text>
+        <text x="32" y="343" font-size="10" fill="#333350" font-family="sans-serif">○ concept / project / client</text>
+      </svg>
+    </div>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;margin-bottom:12px;">Entity types follow a small fixed taxonomy, but the <code>EntityExtractor</code> can use any custom string when none of the standard types fit. Standard types get consistent visual treatment in the dashboard and consistent query handling in the scope system.</p>
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;">Each entity has an <code>attributes</code> map stored as JSON. Attributes from multiple extractions are merged — if two different episodes both discover details about the Instantly API, their attribute sets are unioned. This lets the graph accumulate a richer picture of an entity over time without creating duplicate nodes.</p>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table>
+        <thead><tr><th>Entity Type</th><th>Examples</th><th>Extracted when…</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill pill-gold">api</span></td><td>Instantly API, GitHub API</td><td>Agent makes API calls; rate limits or auth patterns observed</td></tr>
+          <tr><td><span class="pill pill-green">tool</span></td><td>web-search, send-email, Jina Reader API</td><td>Agent uses a tool repeatedly or discovers a trick about it</td></tr>
+          <tr><td><span class="pill pill-amber">agent</span></td><td>deploy-agent, research-manager, pricing-scraper</td><td>Agent delegates to another agent; outcome recorded</td></tr>
+          <tr><td><span class="pill pill-danger">error</span></td><td>429 Too Many Requests, 403 Forbidden</td><td>Error required a specific resolution strategy</td></tr>
+          <tr><td><span class="pill pill-dim">concept</span></td><td>rate limiting, pagination cursors, bot protection</td><td>Abstract pattern appears across multiple tools or sessions</td></tr>
+          <tr><td><span class="pill pill-dim">project / client</span></td><td>Project Apollo, Acme Corp — or any custom string</td><td>Work context spans multiple sessions or agents</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       SCOPE HIERARCHY
+  ════════════════════════════════════════════ -->
+  <section>
+    <h2>Scope Hierarchy <span class="tag">Visibility</span></h2>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;margin-bottom:12px;">Not every fact should be visible to every agent. A discovery that's specific to one agent's workflow would be noise in another agent's briefing. The scope system solves this with three nested visibility levels that determine which agents can read a given triple.</p>
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;margin-bottom:12px;"><strong style="color:var(--text)">Team membership is derived automatically</strong> from the <code>reportsTo</code> field in agent YAML frontmatter — no manual team declaration needed. All agents with the same <code>reportsTo</code> value are on the same team. An agent without a <code>reportsTo</code> field is on no team and sees only its own private scope plus global.</p>
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;">The briefing query unions all three levels in the agent's chain: its own <code>agent</code>-scoped facts, any <code>team</code>-scoped facts from its team, and all <code>global</code>-scoped facts. Results are sorted by confidence descending and trimmed to the briefing budget.</p>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;">
+      <svg viewBox="0 0 840 270" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <rect width="840" height="270" fill="#06060a"/>
+        <pattern id="sdots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
+          <circle cx="0.5" cy="0.5" r="0.5" fill="#111120"/>
+        </pattern>
+        <rect width="840" height="270" fill="url(#sdots)"/>
+
+        <!-- Global ring -->
+        <ellipse cx="420" cy="138" rx="395" ry="112" fill="rgba(212,160,32,0.03)" stroke="#d4a020" stroke-width="1.2" stroke-dasharray="8,5" opacity=".5"/>
+        <text x="46" y="50" font-size="10" fill="#d4a020" font-family="sans-serif" font-weight="700" letter-spacing="2" opacity=".7">GLOBAL</text>
+        <text x="46" y="65" font-size="9" fill="#8a6a10" font-family="sans-serif">all agents</text>
+
+        <!-- Team ring -->
+        <ellipse cx="420" cy="145" rx="278" ry="80" fill="rgba(255,152,0,0.03)" stroke="#ff9800" stroke-width="1.2" stroke-dasharray="6,4" opacity=".6"/>
+        <text x="154" y="80" font-size="10" fill="#ff9800" font-family="sans-serif" font-weight="700" letter-spacing="2" opacity=".7">TEAM</text>
+        <text x="154" y="95" font-size="9" fill="#7a4400" font-family="sans-serif">same reportsTo</text>
+
+        <!-- Agent ring -->
+        <ellipse cx="420" cy="150" rx="148" ry="54" fill="rgba(212,160,32,0.06)" stroke="#d4a020" stroke-width="1.5" opacity=".8"/>
+        <text x="282" y="112" font-size="10" fill="#d4a020" font-family="sans-serif" font-weight="700" letter-spacing="2">AGENT</text>
+        <text x="282" y="127" font-size="9" fill="#8a6a10" font-family="sans-serif">private</text>
+
+        <!-- Agent nodes -->
+        <circle cx="382" cy="150" r="24" fill="#12100a" stroke="#d4a020" stroke-width="1.5"/>
+        <text x="382" y="155" text-anchor="middle" font-size="11" fill="#d4a020" font-family="sans-serif" font-weight="700">A1</text>
+
+        <circle cx="458" cy="150" r="24" fill="#12100a" stroke="#d4a020" stroke-width="1.5"/>
+        <text x="458" y="155" text-anchor="middle" font-size="11" fill="#d4a020" font-family="sans-serif" font-weight="700">A2</text>
+
+        <!-- Team nodes -->
+        <circle cx="210" cy="155" r="24" fill="#100a00" stroke="#ff9800" stroke-width="1.5"/>
+        <text x="210" y="160" text-anchor="middle" font-size="11" fill="#ff9800" font-family="sans-serif" font-weight="700">B1</text>
+
+        <circle cx="630" cy="155" r="24" fill="#100a00" stroke="#ff9800" stroke-width="1.5"/>
+        <text x="630" y="160" text-anchor="middle" font-size="11" fill="#ff9800" font-family="sans-serif" font-weight="700">B2</text>
+
+        <!-- Global nodes -->
+        <circle cx="104" cy="165" r="20" fill="#111118" stroke="#d4a020" stroke-width="1" opacity=".4"/>
+        <text x="104" y="170" text-anchor="middle" font-size="11" fill="#8a6a10" font-family="sans-serif" font-weight="700">C1</text>
+
+        <circle cx="736" cy="165" r="20" fill="#111118" stroke="#d4a020" stroke-width="1" opacity=".4"/>
+        <text x="736" y="170" text-anchor="middle" font-size="11" fill="#8a6a10" font-family="sans-serif" font-weight="700">C2</text>
+
+        <!-- Promotion arrow -->
+        <defs>
+          <marker id="pa" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+            <polygon points="0 0,7 2.5,0 5" fill="#d4a020"/>
+          </marker>
+        </defs>
+        <path d="M420 96 L420 52" stroke="#d4a020" stroke-width="1" stroke-dasharray="4,3" fill="none" marker-end="url(#pa)" opacity=".5"/>
+        <text x="426" y="76" font-size="9" fill="#8a6a10" font-family="sans-serif">promote</text>
+
+        <text x="420" y="235" text-anchor="middle" font-size="11" fill="#333350" font-family="sans-serif">Briefing query reads: agent scope → team scope → global scope</text>
+      </svg>
+    </div>
+
+    <div class="card-grid three" style="margin-bottom:14px;">
+      <div class="card-sm">
+        <div class="label">Agent scope</div>
+        <div class="value" style="margin-bottom:8px;">Private. Only the creating agent can read it.</div>
+        <div style="font-size:11px;color:var(--text-dim);line-height:1.65;">The default scope for all new triples. Facts live here until they prove useful to teammates or reach the global threshold.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Team scope</div>
+        <div class="value" style="margin-bottom:8px;">Shared with all agents that share the same <code>reportsTo</code>.</div>
+        <div style="font-size:11px;color:var(--text-dim);line-height:1.65;">When an agent-scoped fact is retrieved by multiple teammates, it gets promoted here so they all benefit from it automatically.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Global scope</div>
+        <div class="value" style="margin-bottom:8px;">Visible to every agent in the swarm.</div>
+        <div style="font-size:11px;color:var(--text-dim);line-height:1.65;">Reserved for cross-cutting facts — API rate limits, auth patterns, known error types — that are universally relevant regardless of team.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px;">
+      <div style="font-size:10px;color:var(--text-dim);font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;">Scope Promotion</div>
+      <p style="font-size:13px;color:var(--text-sec);line-height:1.8;margin-bottom:12px;">Facts automatically bubble up the hierarchy during deep sleep consolidation based on utilization counts tracked by <code>SwarmMetrics</code>. An agent-scoped fact used by multiple teammates gets promoted to team scope; a team-scoped fact used across multiple teams gets promoted to global.</p>
+      <p style="font-size:13px;color:var(--text-sec);line-height:1.8;margin-bottom:16px;">The <code>learningRate</code> config field controls the utilization threshold: <code>conservative</code> requires more evidence before promoting, <code>aggressive</code> promotes quickly. This is a per-agent setting — a high-traffic orchestrator agent might use <code>aggressive</code> while a specialized worker uses <code>conservative</code> to keep its knowledge private until well-validated.</p>
+      <pre style="font-size:12px;"><span class="cm"># Manually promote a triple without waiting for the utilization threshold</span>
+maximus memory promote &lt;sourceId&gt; &lt;predicate&gt; &lt;targetId&gt;</pre>
+    </div>
+
+    <div class="card">
+      <div style="font-size:10px;color:var(--text-dim);font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;">Additional Scopes via knowledgeScopes</div>
+      <p style="font-size:13px;color:var(--text-sec);line-height:1.8;margin-bottom:16px;">An agent can reach into other teams' knowledge beyond its natural hierarchy using the <code>knowledgeScopes</code> field. This is useful for cross-functional agents that coordinate between teams — for example, an integration agent that needs to know both what the infra team and the data team have learned.</p>
+      <pre style="font-size:12px;"><span class="kw">memory:</span>
+  <span class="kw">knowledgeScopes:</span>
+    - infra-team   <span class="cm"># query facts from agents reporting to infra-lead</span>
+    - data-team    <span class="cm"># query facts from data pipeline agents</span></pre>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       TRIPLES
+  ════════════════════════════════════════════ -->
+  <section>
+    <h2>Knowledge Triples <span class="tag">Temporal Facts</span></h2>
+    <div class="card">
+      <p style="color:var(--text-sec);font-size:14px;margin-bottom:12px;line-height:1.8;">Relationships between entities are stored as <strong style="color:var(--text)">source → predicate → target</strong> triples. Each is timestamped, scoped, and confidence-weighted. The predicate vocabulary is open — the extractor invents new predicates when none of the common ones fit (<code>uses</code>, <code>depends_on</code>, <code>failed_with</code>, <code>learned_about</code>, <code>works_with</code>, <code>bypasses</code>, <code>rate_limit</code>).</p>
+      <p style="color:var(--text-sec);font-size:14px;margin-bottom:22px;line-height:1.8;">Confidence values reflect how clearly the fact was established in the episode. A direct assertion from the API response — "X-Rate-Limit: 10" — scores 0.9–1.0. An inferred relationship — "agent A seems to call tool B regularly" — might score 0.6–0.7. The briefing generator surfaces high-confidence facts first and can omit low-confidence ones when the budget is tight.</p>
+
+      <!-- Triple diagram -->
+      <div style="display:flex;align-items:center;gap:0;margin-bottom:22px;overflow-x:auto;">
+        <div style="background:#12100a;border:1.5px solid var(--gold);border-radius:10px;padding:12px 20px;text-align:center;white-space:nowrap;min-width:130px;">
+          <div style="font-size:9px;color:var(--gold-dim);font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px;">SOURCE</div>
+          <div style="font-size:14px;font-weight:700;color:var(--gold-bright);">Instantly API</div>
+        </div>
+        <div style="flex:1;min-width:60px;border-top:1.5px solid var(--gold);position:relative;">
+          <div style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:#0a0808;border:1px solid rgba(212,160,32,.35);color:var(--gold);border-radius:100px;padding:2px 14px;font-size:10px;font-weight:700;white-space:nowrap;letter-spacing:.06em;">rate_limit = 10 req/s</div>
+          <div style="position:absolute;right:-7px;top:-5.5px;width:0;height:0;border-top:5.5px solid transparent;border-bottom:5.5px solid transparent;border-left:10px solid var(--gold);"></div>
+        </div>
+        <div style="background:#0a100e;border:1.5px solid var(--success);border-radius:10px;padding:12px 20px;text-align:center;white-space:nowrap;min-width:130px;">
+          <div style="font-size:9px;color:#005533;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px;">TARGET</div>
+          <div style="font-size:14px;font-weight:700;color:var(--success);">sending ops</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;">
+        <table>
+          <thead><tr><th>Field</th><th>Description</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td><code>predicate</code></td><td>Short verb phrase</td><td><code>uses</code>, <code>depends_on</code>, <code>failed_with</code></td></tr>
+            <tr><td><code>scope</code></td><td>Visibility level</td><td><span class="pill pill-gold">agent</span> <span class="pill pill-amber">team</span> <span class="pill" style="background:rgba(212,160,32,0.08);color:var(--gold-dim);border:1px solid rgba(212,160,32,0.15);">global</span></td></tr>
+            <tr><td><code>confidence</code></td><td>Float 0–1</td><td><code>0.95</code></td></tr>
+            <tr><td><code>evidence</code></td><td>Source episode ID</td><td><code>ep_abc123</code></td></tr>
+            <tr><td><code>validFrom / validTo</code></td><td><code>validTo=null</code> → currently active</td><td><code>1742000000 / null</code></td></tr>
+            <tr><td><code>createdBy</code></td><td>Extracting agent</td><td><code>researcher</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="background:var(--dominant);border:1px solid rgba(212,160,32,0.15);border-radius:8px;padding:16px 18px;">
+        <div style="font-size:10px;color:var(--gold-dim);font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;">Temporal Supersession</div>
+        <p style="font-size:13px;color:var(--text-sec);line-height:1.8;margin-bottom:10px;">When a new fact contradicts an existing one (same source, predicate, and target), the old triple's <code>validTo</code> is stamped with the current timestamp and the new triple is inserted with <code>validFrom = now</code>. The graph is an <strong style="color:var(--text)">append-only fact log</strong> — history is never deleted.</p>
+        <p style="font-size:13px;color:var(--text-sec);line-height:1.8;">This means you can never silently overwrite a fact. Every belief change is recorded. If an agent suddenly behaves differently after a consolidation run, you can inspect the triple history to see exactly what changed in its knowledge graph and which episode caused the change.</p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       AGENT BRIEFINGS
+  ════════════════════════════════════════════ -->
+  <section>
+    <h2>Agent Briefings <span class="tag">Pre-session Injection</span></h2>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;margin-bottom:12px;">A briefing is a compact markdown document injected at the top of an agent's system prompt before every session. It surfaces the specific, hard-won facts about the agent's environment that wouldn't otherwise be available. The briefing is intentionally compact — its purpose is not to replace training but to bridge the gap between what the model generally knows and what this specific agent has learned in this specific environment.</p>
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;margin-bottom:12px;">The <code>PromptInjector</code> wraps the briefing in explicit delimiters with a header instructing the model not to treat it as task instructions. Without this, the agent might interpret a past lesson like "always use Jina Reader for bot-protected sites" as a hard rule that overrides the user's actual task rather than as prior experience to draw on when relevant.</p>
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;">Briefings are pre-generated during deep sleep and cached in SQLite. The cache is invalidated when any new episode or triple arrives for the agent, ensuring the briefing is never more than one consolidation cycle (by default, 24 hours) behind real-time.</p>
+    </div>
+
+    <div class="card-grid" style="margin-bottom:14px;">
+      <div class="card">
+        <div style="font-size:10px;color:var(--text-dim);font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:16px;">Priority Order</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:rgba(255,68,102,0.1);border:1.5px solid var(--danger);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--danger);flex-shrink:0;">1</div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Recent Lessons</div>
+              <div style="font-size:11px;color:var(--text-dim);">failures &amp; what went wrong</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:rgba(212,160,32,0.1);border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0;">2</div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Key Knowledge</div>
+              <div style="font-size:11px;color:var(--text-dim);">entities &amp; relationships from graph</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:rgba(0,255,136,0.08);border:1.5px solid var(--success);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--success);flex-shrink:0;">3</div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Active Strategies</div>
+              <div style="font-size:11px;color:var(--text-dim);">successful patterns from episodes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.15em;text-transform:uppercase;">Example Briefing</div>
+        <pre style="border:none;border-radius:0;font-size:11.5px;padding:16px;line-height:1.7;"><span class="kw">## Session Briefing</span> for researcher
+
+<span class="kw">### Recent Lessons</span>
+- [failure] scrape pricing page: 403 on
+  direct fetch (1 day ago)
+- [success] Jina Reader bypassed bot
+  protection (1 day ago)
+
+<span class="kw">### Key Knowledge</span>
+- Jina Reader API: bypasses_bot = true
+  (confidence: 0.95)
+- pricing-scraper depends_on
+  Jina Reader API (conf: 0.9)
+
+<span class="kw">### Active Strategies</span>
+- Try Jina Reader before direct fetch
+- Check for pagination cursors</pre>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table>
+        <thead><tr><th>Config Field</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>episodic</code></td><td>boolean</td><td><code>true</code></td><td>Capture episodes from sessions</td></tr>
+          <tr><td><code>maxEpisodes</code></td><td>number</td><td><code>50</code></td><td>Max episodes retained per agent</td></tr>
+          <tr><td><code>briefingEnabled</code></td><td>boolean</td><td><code>true</code></td><td>Inject briefing before sessions</td></tr>
+          <tr><td><code>briefingTokenBudget</code></td><td>number</td><td><code>2000</code></td><td>Max characters for briefing</td></tr>
+          <tr><td><code>learningRate</code></td><td>string</td><td><code>moderate</code></td><td><code>conservative</code> / <code>moderate</code> / <code>aggressive</code></td></tr>
+          <tr><td><code>knowledgeScopes</code></td><td>string[]</td><td><code>[]</code></td><td>Additional team scopes to query</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       DEEP SLEEP
+  ════════════════════════════════════════════ -->
+  <section>
+    <h2>Deep Sleep Consolidation <span class="tag">3 AM Daily</span></h2>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;margin-bottom:12px;">Consolidation is the background job that turns raw session traces into structured knowledge. It runs on a cron schedule (default: 3 AM daily) and processes all accumulated trace files since the last run. The six-step pipeline is idempotent — if it crashes halfway through, the next run picks up where it left off using a watermark in SQLite.</p>
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;">Steps ① and ② are fast (pure parsing and SQL writes, no LLM). Step ③ is the most expensive because it involves Claude Haiku API calls — but it only runs on <em>new</em> episodes, so costs scale with session activity, not swarm size. For high-volume swarms, you can run consolidation more frequently to keep briefings fresher.</p>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;">
+      <svg viewBox="0 0 840 96" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <defs>
+          <marker id="sa" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+            <polygon points="0 0,7 2.5,0 5" fill="#333350"/>
+          </marker>
+        </defs>
+        <rect width="840" height="96" fill="#06060a"/>
+
+        <!-- boxes -->
+        <rect x="12" y="24" width="116" height="48" rx="9" fill="#111118" stroke="#222233" stroke-width="1.5"/>
+        <text x="70" y="44" text-anchor="middle" font-size="11" font-weight="700" fill="#8888a0" font-family="sans-serif">Trace</text>
+        <text x="70" y="60" text-anchor="middle" font-size="10" fill="#555570" font-family="sans-serif">Analysis</text>
+
+        <line x1="128" y1="48" x2="144" y2="48" stroke="#333350" stroke-width="1.5" marker-end="url(#sa)"/>
+
+        <rect x="144" y="24" width="122" height="48" rx="9" fill="#12100a" stroke="#d4a020" stroke-width="1.5"/>
+        <text x="205" y="44" text-anchor="middle" font-size="11" font-weight="700" fill="#d4a020" font-family="sans-serif">Episode</text>
+        <text x="205" y="60" text-anchor="middle" font-size="10" fill="#8a6a10" font-family="sans-serif">Distillation</text>
+
+        <line x1="266" y1="48" x2="282" y2="48" stroke="#333350" stroke-width="1.5" marker-end="url(#sa)"/>
+
+        <rect x="282" y="24" width="122" height="48" rx="9" fill="#100a00" stroke="#ff9800" stroke-width="1.5"/>
+        <text x="343" y="44" text-anchor="middle" font-size="11" font-weight="700" fill="#ff9800" font-family="sans-serif">Entity</text>
+        <text x="343" y="60" text-anchor="middle" font-size="10" fill="#7a4400" font-family="sans-serif">Extraction</text>
+
+        <line x1="404" y1="48" x2="420" y2="48" stroke="#333350" stroke-width="1.5" marker-end="url(#sa)"/>
+
+        <rect x="420" y="24" width="122" height="48" rx="9" fill="#0a100e" stroke="#00ff88" stroke-width="1.5"/>
+        <text x="481" y="44" text-anchor="middle" font-size="11" font-weight="700" fill="#00ff88" font-family="sans-serif">Briefing</text>
+        <text x="481" y="60" text-anchor="middle" font-size="10" fill="#005533" font-family="sans-serif">Generation</text>
+
+        <line x1="542" y1="48" x2="558" y2="48" stroke="#333350" stroke-width="1.5" marker-end="url(#sa)"/>
+
+        <rect x="558" y="24" width="138" height="48" rx="9" fill="#0f0a00" stroke="#d4a020" stroke-width="1.5"/>
+        <text x="627" y="44" text-anchor="middle" font-size="11" font-weight="700" fill="#f0c040" font-family="sans-serif">Prune &amp; Promote</text>
+        <text x="627" y="60" text-anchor="middle" font-size="10" fill="#8a6a10" font-family="sans-serif">stale facts → scope up</text>
+
+        <line x1="696" y1="48" x2="712" y2="48" stroke="#333350" stroke-width="1.5" marker-end="url(#sa)"/>
+
+        <rect x="712" y="24" width="112" height="48" rx="9" fill="#111118" stroke="#333350" stroke-width="1.5"/>
+        <text x="768" y="44" text-anchor="middle" font-size="11" font-weight="700" fill="#8888a0" font-family="sans-serif">Done</text>
+        <text x="768" y="60" text-anchor="middle" font-size="10" fill="#555570" font-family="sans-serif">cache ready</text>
+
+        <!-- step numbers -->
+        <text x="70" y="17" text-anchor="middle" font-size="9" fill="#333350" font-family="monospace" font-weight="700">①</text>
+        <text x="205" y="17" text-anchor="middle" font-size="9" fill="#d4a020" font-family="monospace" font-weight="700">②</text>
+        <text x="343" y="17" text-anchor="middle" font-size="9" fill="#ff9800" font-family="monospace" font-weight="700">③</text>
+        <text x="481" y="17" text-anchor="middle" font-size="9" fill="#00ff88" font-family="monospace" font-weight="700">④</text>
+        <text x="627" y="17" text-anchor="middle" font-size="9" fill="#d4a020" font-family="monospace" font-weight="700">⑤⑥</text>
+        <text x="768" y="17" text-anchor="middle" font-size="9" fill="#333350" font-family="monospace" font-weight="700">✓</text>
+      </svg>
+    </div>
+    <div class="card-grid" style="margin-bottom:14px;">
+      <div class="card-sm">
+        <div class="label">① Trace Analysis</div>
+        <div class="value" style="line-height:1.7;">Scans the trace directory for JSONL files not yet processed. Uses a watermark in SQLite to avoid reprocessing.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">② Episode Distillation</div>
+        <div class="value" style="line-height:1.7;">Extracts task, outcome, and lessons from each trace. Pure parsing — no LLM calls. Results written to SQLite.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">③ Entity Extraction</div>
+        <div class="value" style="line-height:1.7;">Batches new episodes to Claude Haiku in parallel. Returns typed entities and triples with confidence scores. Written to Kuzu.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">④ Briefing Generation</div>
+        <div class="value" style="line-height:1.7;">Assembles prioritized markdown briefings for agents with new activity. Writes to the SQLite cache. Agents with no changes are skipped.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">⑤ Stale Knowledge Pruning</div>
+        <div class="value" style="line-height:1.7;">Removes triples with <code>validTo</code> older than the retention window (default: 90 days). Prunes oldest episodes past <code>maxEpisodes</code>.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">⑥ Scope Promotion</div>
+        <div class="value" style="line-height:1.7;">Reads utilization counts from SwarmMetrics. Promotes qualifying triples to wider scopes. Resets counters.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <pre><span class="cm"># Configure via env var (cron syntax). Default: 3 AM daily.</span>
+<span class="kw">export</span> MAXIMUS_DEEP_SLEEP_SCHEDULE=<span class="str">"0 3 * * *"</span>
+
+<span class="cm"># For high-volume swarms — run every 6 hours for fresher briefings</span>
+<span class="kw">export</span> MAXIMUS_DEEP_SLEEP_SCHEDULE=<span class="str">"0 */6 * * *"</span></pre>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       CLI
+  ════════════════════════════════════════════ -->
+  <section>
+    <h2>CLI Reference</h2>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p style="font-size:14px;color:var(--text-sec);line-height:1.8;">Three commands give you visibility into and control over the memory system. <code>status</code> is the starting point — it shows the overall health of the system, when consolidation last ran, and which agents are accumulating the most knowledge. <code>inspect</code> drills into a single agent. <code>promote</code> lets you push a fact to a wider scope without waiting for the automatic utilization threshold to trigger.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:14px;">
+      <pre><span class="cm"># Overall memory status — episode counts, graph size, briefing cache state,
+# last consolidation timestamp, and top agents by knowledge utilization</span>
+maximus memory status
+
+<span class="cm"># Inspect a specific agent — recent episodes with outcomes and lessons,
+# known entities and triples in its scope chain, and the current cached briefing</span>
+maximus memory inspect &lt;agent-name&gt;
+
+<span class="cm"># Manually promote a triple to a higher scope, bypassing the utilization threshold</span>
+maximus memory promote &lt;sourceId&gt; &lt;predicate&gt; &lt;targetId&gt;</pre>
+    </div>
+
+    <div class="card-grid">
+      <div class="card-sm">
+        <div class="label">Swarm Metric: Knowledge Utilization</div>
+        <div class="value" style="line-height:1.7;margin-bottom:6px;">How often entities and triples appear in briefings the agent subsequently acted on. Drives scope promotion.</div>
+        <div style="font-size:11px;color:var(--text-dim);line-height:1.6;">Facts that are extracted but never retrieved will eventually be pruned. High utilization is the signal that a fact is worth sharing more widely.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Swarm Metric: Delegation Success Rate</div>
+        <div class="value" style="line-height:1.7;margin-bottom:6px;">Success/failure rate per delegator–delegatee pair, from <code>delegation:result</code> trace events.</div>
+        <div style="font-size:11px;color:var(--text-dim);line-height:1.6;">Surfaces structural problems — an orchestrator repeatedly delegating to a failing agent will appear in <code>memory status</code> as a pattern worth investigating.</div>
+      </div>
+    </div>
+  </section>
+
+
+  <footer>
+    Maximus &nbsp;·&nbsp; Knowledge Graph &amp; Memory System &nbsp;·&nbsp; maximus.run
+  </footer>
+</div>
+</body>
+</html>

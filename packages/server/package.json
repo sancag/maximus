@@ -1,0 +1,41 @@
+{
+	"name": "@maximus/server",
+	"version": "0.1.0",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"build": "tsup src/index.ts --format esm --dts",
+		"test": "vitest run",
+		"start": "tsx src/main.ts"
+	},
+	"dependencies": {
+		"@maximus/core": "workspace:*",
+		"@maximus/memory": "workspace:*",
+		"@maximus/shared": "workspace:*",
+		"@types/cors": "^2.8.19",
+		"cors": "^2.8.6",
+		"croner": "^10.0.1",
+		"express": "^5.1.0",
+		"nanoid": "^5.1.7",
+		"pino": "^10.3.1",
+		"ws": "^8.19.0",
+		"zod": "^4.3.6"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.0",
+		"@types/node": "^22",
+		"@types/ws": "^8.18.1",
+		"tsup": "^8.5.1",
+		"tsx": "^4.21.0",
+		"typescript": "^5.7",
+		"vitest": "^4.1.0"
+	}
+}

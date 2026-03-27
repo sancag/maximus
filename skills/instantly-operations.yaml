@@ -1,0 +1,270 @@
+name: instantly-operations
+description: Manage Instantly.ai email campaigns, leads, accounts, and analytics
+version: "1.0"
+
+credentials:
+  - name: instantly_api_key
+    description: Instantly.ai API key (v2)
+
+tools:
+  - name: instantly_list_campaigns
+    description: List all email campaigns with their status
+    parameters:
+      limit:
+        type: number
+        description: "Max campaigns to return (default 10)"
+        required: false
+      status:
+        type: string
+        description: "Filter by status: active, paused, draft, completed"
+        required: false
+    credentials:
+      - ref: instantly_api_key
+        inject_as: API_KEY
+    action:
+      type: http
+      method: GET
+      url: "https://api.instantly.ai/api/v2/campaigns"
+      headers:
+        Authorization: "Bearer {{API_KEY}}"
+        Content-Type: application/json
+
+  - name: instantly_get_campaign
+    description: Get details for a specific campaign by ID
+    parameters:
+      campaign_id:
+        type: string
+        description: "Campaign ID"
+    credentials:
+      - ref: instantly_api_key
+        inject_as: API_KEY
+    action:
+      type: http
+      method: GET
+      url: "https://api.instantly.ai/api/v2/campaigns/{{campaign_id}}"
+      headers:
+        Authorization: "Bearer {{API_KEY}}"
+
+  - name: instantly_get_campaign_analytics
+    description: Get analytics (sent, opened, replied, bounced) for a campaign
+    parameters:
+      campaign_id:
+        type: string
+        description: "Campaign ID"
+    credentials:
+      - ref: instantly_api_key
+        inject_as: API_KEY
+    action:
+      type: http
+      method: GET
+      url: "https://api.instantly.ai/api/v2/campaigns/{{campaign_id}}/analytics"
+      headers:
+        Authorization: "Bearer {{API_KEY}}"
+
+  - name: instantly_get_daily_analytics
+    description: Get daily send/open/reply breakdown for a campaign
+    parameters:
+      campaign_id:
+        type: string
+        description: "Campaign ID"
+    credentials:
+      - ref: instantly_api_key
+        inject_as: API_KEY
+    action:
+      type: http
+      method: GET
+      url: "https://api.instantly.ai/api/v2/campaigns/{{campaign_id}}/analytics/daily"
+      headers:
+        Authorization: "Bearer {{API_KEY}}"
+
+  - name: instantly_list_accounts
+    description: List all sending email accounts
+    parameters:
+      limit:
+        type: number
+        description: "Max accounts to return"
+        required: false
+    credentials:
+      - ref: instantly_api_key
+        inject_as: API_KEY
+    action:
+      type: http
+      method: GET
+      url: "https://api.instantly.ai/api/v2/accounts"
+      headers:
+        Authorization: "Bearer {{API_KEY}}"
+
+  - name: instantly_get_warmup_analytics
+    description: Get warmup stats for a sending account
+    parameters:
+      account_id:
+        type: string
+        description: "Account ID (email address)"
+    credentials:
+      - ref: instantly_api_key
+        inject_as: API_KEY
+    action:
+      type: http
+      method: GET
+      url: "https://api.instantly.ai/api/v2/accounts/{{account_id}}/warmup"
+      headers:
+        Authorization: "Bearer {{API_KEY}}"
+
+  - name: instantly_list_leads
+    description: List leads, optionally filtered by campaign or list
+    parameters:
+      campaign_id:
+        type: string
+        description: "Filter by campaign ID"
+        required: false
+      list_id:
+        type: string
+        description: "Filter by lead list ID"
+        required: false
+      limit:
+        type: number
+        description: "Max leads to return"
+        required: false
+    credentials:
+      - ref: instantly_api_key
+        inject_as: API_KEY
+    action:
+      type: http
+      method: GET
+      url: "https://api.instantly.ai/api/v2/leads"
+      headers:
+        Authorization: "Bearer {{API_KEY}}"
+
+  - name: instantly_list_lead_lists
+    description: List all lead lists
+    parameters:
+      limit:
+        type: number
+        description: "Max lists to return"
+        required: false
+    credentials:
+      - ref: instantly_api_key
+        inject_as: API_KEY
+    action:
+      type: http
+      method: GET
+      url: "https://api.instantly.ai/api/v2/lead-lists"
+      headers:
+        Authorization: "Bearer {{API_KEY}}"
+
+  - name: instantly_count_unread
+    description: Count unread emails across all campaigns
+    parameters:
+      campaign_id:
+        type: string
+        description: "Optional campaign ID to scope the count"
+        required: false
+    credentials:
+      - ref: instantly_api_key
+        inject_as: API_KEY
+    action:
+      type: http
+      method: GET
+      url: "https://api.instantly.ai/api/v2/emails/unread/count"
+      headers:
+        Authorization: "Bearer {{API_KEY}}"
+
+  - name: instantly_list_emails
+    description: List email threads with optional filters
+    parameters:
+      campaign_id:
+        type: string
+        description: "Filter by campaign"
+        required: false
+      is_read:
+        type: boolean
+        description: "Filter by read status"
+        required: false
+    credentials:
+      - ref: instantly_api_key
+        inject_as: API_KEY
+    action:
+      type: http
+      method: GET
+      url: "https://api.instantly.ai/api/v2/emails"
+      headers:
+        Authorization: "Bearer {{API_KEY}}"
+
+  - name: instantly_activate_campaign
+    description: Activate a paused or draft campaign to start sending
+    parameters:
+      campaign_id:
+        type: string
+        description: "Campaign ID to activate"
+    credentials:
+      - ref: instantly_api_key
+        inject_as: API_KEY
+    action:
+      type: http
+      method: POST
+      url: "https://api.instantly.ai/api/v2/campaigns/{{campaign_id}}/activate"
+      headers:
+        Authorization: "Bearer {{API_KEY}}"
+
+  - name: instantly_pause_campaign
+    description: Pause an active campaign
+    parameters:
+      campaign_id:
+        type: string
+        description: "Campaign ID to pause"
+    credentials:
+      - ref: instantly_api_key
+        inject_as: API_KEY
+    action:
+      type: http
+      method: POST
+      url: "https://api.instantly.ai/api/v2/campaigns/{{campaign_id}}/pause"
+      headers:
+        Authorization: "Bearer {{API_KEY}}"
+
+  - name: instantly_create_lead
+    description: Create a new lead
+    parameters:
+      email:
+        type: string
+        description: "Lead email address"
+      first_name:
+        type: string
+        description: "Lead first name"
+        required: false
+      last_name:
+        type: string
+        description: "Lead last name"
+        required: false
+      company_name:
+        type: string
+        description: "Lead company name"
+        required: false
+      list_id:
+        type: string
+        description: "Lead list ID to add to"
+        required: false
+    credentials:
+      - ref: instantly_api_key
+        inject_as: API_KEY
+    action:
+      type: http
+      method: POST
+      url: "https://api.instantly.ai/api/v2/leads"
+      headers:
+        Authorization: "Bearer {{API_KEY}}"
+        Content-Type: application/json
+      body:
+        email: "{{email}}"
+        first_name: "{{first_name}}"
+        last_name: "{{last_name}}"
+        company_name: "{{company_name}}"
+
+instructions: |
+  When working with Instantly.ai:
+  - Always list campaigns first to get IDs before pulling analytics
+  - Present analytics in tables with clear metric labels
+  - When reporting, calculate rates (open rate, reply rate) as percentages
+  - Flag any campaign with reply rate below 1% or bounce rate above 5%
+  - Never activate a campaign without explicit user confirmation
+  - Check warmup status before recommending campaign activation

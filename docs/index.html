@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maximus — Self-Hosted Agent Orchestration Platform</title>
+<style>
+  :root {
+    --bg:           #06060a;
+    --dominant:     #0a0a0f;
+    --surface:      #111118;
+    --elevated:     #1a1a24;
+    --border:       #222233;
+    --border-dim:   #1a1a28;
+
+    --gold:         #d4a020;
+    --gold-bright:  #f0c040;
+    --gold-dim:     #8a6a10;
+    --gold-ring:    rgba(212,160,32,0.08);
+    --amber:        #ff9800;
+    --orange-dark:  #e65100;
+
+    --success:      #00ff88;
+    --warn:         #ffaa00;
+    --danger:       #ff4466;
+    --blue:         #4488ff;
+
+    --text:         #e0e0e8;
+    --text-sec:     #8888a0;
+    --text-dim:     #555570;
+
+    --glow:         0 0 12px rgba(212,160,32,0.3);
+    --glow-strong:  0 0 24px rgba(212,160,32,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 52px 24px;
+  }
+
+  .page { max-width: 920px; margin: 0 auto; }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    padding: 64px 40px 56px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(212,160,32,0.1) 0%, transparent 65%),
+                var(--surface);
+    border: 1px solid rgba(212,160,32,0.25);
+    border-radius: 20px;
+    margin-bottom: 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .hero-logo { width: 72px; height: 72px; margin: 0 auto 24px; display: block; }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(212,160,32,0.12);
+    border: 1px solid rgba(212,160,32,0.3);
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 4px 16px;
+    border-radius: 100px;
+    margin-bottom: 22px;
+  }
+  .hero h1 {
+    font-size: 52px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(160deg, var(--gold-bright) 0%, var(--gold) 50%, var(--amber) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 18px;
+    line-height: 1.1;
+  }
+  .hero p {
+    color: var(--text-sec);
+    font-size: 16px;
+    max-width: 580px;
+    margin: 0 auto 32px;
+    line-height: 1.7;
+  }
+  .hero-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .hero-links a {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 11px 26px; border-radius: 10px; font-size: 13px; font-weight: 600;
+    text-decoration: none; transition: all 0.2s ease;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--amber) 100%);
+    color: #000; border: none;
+  }
+  .btn-primary:hover { box-shadow: var(--glow-strong); transform: translateY(-1px); }
+  .btn-ghost {
+    background: transparent; color: var(--text-sec); border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--gold); border-color: rgba(212,160,32,0.3); }
+
+  /* ── Section ── */
+  section { margin-bottom: 64px; }
+
+  h2 {
+    font-size: 24px; font-weight: 700; letter-spacing: -0.01em;
+    margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--text);
+  }
+  h2 .tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+    background: rgba(212,160,32,0.12); color: var(--gold);
+    padding: 2px 10px; border-radius: 100px; border: 1px solid rgba(212,160,32,0.2);
+  }
+  h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; margin-top: 20px; color: var(--text); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 28px; margin-bottom: 14px;
+  }
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .card-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card-sm {
+    background: var(--elevated); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 20px;
+  }
+  .card-sm .label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--text-dim); margin-bottom: 7px;
+  }
+  .card-sm .value { font-size: 13px; color: var(--text-sec); line-height: 1.65; }
+
+  /* ── Topic cards (clickable) ── */
+  .topic-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .topic-card {
+    display: block; text-decoration: none;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px; transition: all 0.2s ease;
+    position: relative; overflow: hidden;
+  }
+  .topic-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .topic-card:hover { border-color: rgba(212,160,32,0.3); transform: translateY(-2px); }
+  .topic-card:hover::before { opacity: 1; }
+  .topic-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 14px;
+  }
+  .topic-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+  .topic-card p { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+  .topic-arrow { color: var(--gold-dim); font-size: 12px; margin-top: 10px; display: block; }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left; padding: 10px 16px; background: var(--elevated);
+    color: var(--text-dim); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 11px 16px; border-bottom: 1px solid var(--border-dim);
+    color: var(--text-sec); vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  td strong { color: var(--text); }
+  td code, code {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 4px; font-size: 11px;
+    font-family: 'SF Mono','Fira Code',monospace; color: var(--gold);
+  }
+
+  /* ── Code ── */
+  pre {
+    background: var(--dominant); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px;
+    font-family: 'SF Mono','Fira Code','Consolas',monospace;
+    font-size: 12.5px; color: #9090b0; overflow-x: auto; line-height: 1.65;
+    margin-bottom: 14px;
+  }
+  .kw  { color: var(--gold); }
+  .str { color: var(--success); }
+  .cm  { color: var(--text-dim); font-style: italic; }
+
+  /* ── Pills ── */
+  .pill {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 2px 9px; border-radius: 100px; letter-spacing: 0.06em;
+  }
+  .pill-gold   { background: rgba(212,160,32,0.15);  color: var(--gold); border: 1px solid rgba(212,160,32,0.25); }
+  .pill-amber  { background: rgba(255,152,0,0.12);   color: var(--amber); border: 1px solid rgba(255,152,0,0.2); }
+  .pill-green  { background: rgba(0,255,136,0.1);    color: var(--success); border: 1px solid rgba(0,255,136,0.2); }
+  .pill-danger { background: rgba(255,68,102,0.1);   color: var(--danger); border: 1px solid rgba(255,68,102,0.2); }
+  .pill-dim    { background: rgba(136,136,160,0.1);  color: var(--text-sec); border: 1px solid var(--border); }
+  .pill-blue   { background: rgba(68,136,255,0.1);   color: var(--blue); border: 1px solid rgba(68,136,255,0.2); }
+
+  /* ── Prose ── */
+  .prose { font-size: 14px; color: var(--text-sec); line-height: 1.8; }
+  .prose strong { color: var(--text); }
+  .prose-sm { font-size: 13px; color: var(--text-sec); line-height: 1.75; }
+
+  /* ── Component list ── */
+  .component-item { border-left: 3px solid var(--gold); padding-left: 16px; margin-bottom: 16px; }
+  .component-item.green  { border-left-color: var(--success); }
+  .component-item.amber  { border-left-color: var(--amber); }
+  .component-item.dim    { border-left-color: var(--text-dim); }
+  .component-item.blue   { border-left-color: var(--blue); }
+  .component-item.danger { border-left-color: var(--danger); }
+  .component-name {
+    font-size: 13px; font-weight: 700; margin-bottom: 4px;
+    font-family: 'SF Mono','Fira Code',monospace;
+  }
+
+  /* ── Doc links ── */
+  .doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .doc-link {
+    display: block; padding: 18px 20px; border-radius: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    text-decoration: none; transition: all 0.2s ease;
+  }
+  .doc-link:hover { border-color: rgba(212,160,32,0.3); background: rgba(212,160,32,0.04); }
+  .doc-link .doc-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .doc-link .doc-desc { font-size: 12px; color: var(--text-dim); }
+
+  /* ── Step list ── */
+  .step-list { counter-reset: step; }
+  .step-item { position: relative; padding-left: 56px; margin-bottom: 28px; }
+  .step-item::before {
+    counter-increment: step; content: counter(step);
+    position: absolute; left: 0; top: 0; width: 38px; height: 38px;
+    border-radius: 10px; background: rgba(212,160,32,0.1);
+    border: 1px solid rgba(212,160,32,0.25); color: var(--gold);
+    font-size: 14px; font-weight: 700; text-align: center; line-height: 38px;
+  }
+  .step-item h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+
+  footer {
+    text-align: center; color: var(--text-dim); font-size: 12px;
+    padding-top: 32px; border-top: 1px solid var(--border); letter-spacing: 0.05em;
+  }
+  footer a { color: var(--gold-dim); text-decoration: none; }
+  footer a:hover { color: var(--gold); }
+
+  @media (max-width: 700px) {
+    .hero h1 { font-size: 34px; }
+    .hero { padding: 36px 24px 32px; }
+    .card-grid, .card-grid.three, .topic-grid { grid-template-columns: 1fr; }
+    .doc-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══════════════ HERO ══════════════ -->
+  <div class="hero">
+    <svg class="hero-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="72" height="72">
+      <defs><style>.bg{fill:#0b0b0b}.hex{stroke:#C4851A;fill:none;stroke-width:.5}.m{stroke:#E8A422;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.node{fill:#C4851A}.node-bright{fill:#E8A422}</style></defs>
+      <rect class="bg" width="32" height="32" rx="7"/>
+      <line class="hex" x1="16" y1="2.5" x2="27.5" y2="9"/><line class="hex" x1="27.5" y1="11" x2="27.5" y2="21"/><line class="hex" x1="27.5" y1="23" x2="16" y2="29.5"/><line class="hex" x1="4.5" y1="23" x2="16" y2="29.5"/><line class="hex" x1="4.5" y1="11" x2="4.5" y2="21"/><line class="hex" x1="4.5" y1="9" x2="16" y2="2.5"/>
+      <circle class="node-bright" cx="16" cy="2.5" r="1.1"/><circle class="node" cx="27.5" cy="10" r="1.1"/><circle class="node" cx="27.5" cy="22" r="1.1"/><circle class="node" cx="16" cy="29.5" r="1.1"/><circle class="node" cx="4.5" cy="22" r="1.1"/><circle class="node" cx="4.5" cy="10" r="1.1"/>
+      <polyline class="m" points="7,23 7,9 16,17 25,9 25,23"/>
+      <circle class="node-bright" cx="7" cy="23" r="1.4"/><circle class="node-bright" cx="25" cy="23" r="1.4"/><circle class="node-bright" cx="16" cy="17" r="1.6"/>
+    </svg>
+    <div class="hero-badge">Self-Hosted Agent Orchestration</div>
+    <h1>Maximus</h1>
+    <p>Define, coordinate, and monitor hierarchical teams of Claude agents with encrypted credentials, persistent memory, and real-time observability.</p>
+    <div class="hero-links">
+      <a href="#quickstart" class="btn-primary">Get Started</a>
+      <a href="https://github.com/chrisgscott/maximus" class="btn-ghost">GitHub</a>
+    </div>
+  </div>
+
+
+  <!-- ══════════════ HOW IT WORKS — HIGH-LEVEL VISUAL ══════════════ -->
+  <section>
+    <h2>How It Works <span class="tag">Overview</span></h2>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p class="prose">Agents are Markdown files. Skills are YAML files. Credentials are encrypted. The runtime orchestrates everything &mdash; delegation, tool execution, memory, and events &mdash; while the dashboard shows it all in real time.</p>
+    </div>
+
+    <!-- ── Main flow diagram ── -->
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#333350"/></marker>
+          <marker id="arr-g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#d4a020"/></marker>
+          <filter id="gf"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <radialGradient id="gg" cx="50%" cy="30%" r="70%"><stop offset="0%" stop-color="rgba(212,160,32,0.12)"/><stop offset="100%" stop-color="rgba(212,160,32,0)"/></radialGradient>
+        </defs>
+        <rect width="880" height="340" fill="#06060a"/>
+        <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx=".5" cy=".5" r=".5" fill="#111120"/></pattern>
+        <rect width="880" height="340" fill="url(#dots)"/>
+        <rect x="30" y="15" width="820" height="310" rx="16" fill="url(#gg)"/>
+
+        <!-- You / User -->
+        <rect x="50" y="130" width="100" height="60" rx="10" fill="#111118" stroke="#333350" stroke-width="1.5"/>
+        <text x="100" y="157" text-anchor="middle" font-size="12" font-weight="700" fill="#8888a0" font-family="sans-serif">You</text>
+        <text x="100" y="174" text-anchor="middle" font-size="10" fill="#555570" font-family="sans-serif">CLI / Dashboard</text>
+
+        <!-- Arrow → Orchestrator -->
+        <line x1="150" y1="160" x2="198" y2="160" stroke="#333350" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Orchestrator -->
+        <rect x="200" y="120" width="160" height="60" rx="12" fill="#12100a" stroke="#d4a020" stroke-width="2" filter="url(#gf)"/>
+        <text x="280" y="147" text-anchor="middle" font-size="13" font-weight="800" fill="#f0c040" font-family="sans-serif">Orchestrator</text>
+        <text x="280" y="165" text-anchor="middle" font-size="10" fill="#8a6a10" font-family="sans-serif">Sonnet &middot; Root Agent</text>
+
+        <!-- Arrow → delegates -->
+        <line x1="360" y1="140" x2="430" y2="80" stroke="#d4a020" stroke-width="1.5" marker-end="url(#arr-g)"/>
+        <line x1="360" y1="160" x2="430" y2="160" stroke="#d4a020" stroke-width="1.5" marker-end="url(#arr-g)"/>
+        <line x1="360" y1="175" x2="430" y2="240" stroke="#d4a020" stroke-width="1.5" marker-end="url(#arr-g)"/>
+
+        <text x="400" y="115" font-size="9" fill="#8a6a10" font-family="sans-serif" font-weight="600" transform="rotate(-28,400,115)">delegate</text>
+        <text x="395" y="155" font-size="9" fill="#8a6a10" font-family="sans-serif" font-weight="600">delegate</text>
+        <text x="400" y="215" font-size="9" fill="#8a6a10" font-family="sans-serif" font-weight="600" transform="rotate(28,400,215)">delegate</text>
+
+        <!-- Manager 1 -->
+        <rect x="432" y="55" width="150" height="48" rx="10" fill="#100a00" stroke="#ff9800" stroke-width="1.5"/>
+        <text x="507" y="76" text-anchor="middle" font-size="11" font-weight="700" fill="#ff9800" font-family="sans-serif">research-manager</text>
+        <text x="507" y="91" text-anchor="middle" font-size="9" fill="#7a4400" font-family="sans-serif">Sonnet</text>
+
+        <!-- Manager 2 -->
+        <rect x="432" y="136" width="150" height="48" rx="10" fill="#100a00" stroke="#ff9800" stroke-width="1.5"/>
+        <text x="507" y="157" text-anchor="middle" font-size="11" font-weight="700" fill="#ff9800" font-family="sans-serif">ops-manager</text>
+        <text x="507" y="172" text-anchor="middle" font-size="9" fill="#7a4400" font-family="sans-serif">Sonnet</text>
+
+        <!-- Manager 3 -->
+        <rect x="432" y="218" width="150" height="48" rx="10" fill="#100a00" stroke="#ff9800" stroke-width="1.5"/>
+        <text x="507" y="239" text-anchor="middle" font-size="11" font-weight="700" fill="#ff9800" font-family="sans-serif">content-manager</text>
+        <text x="507" y="254" text-anchor="middle" font-size="9" fill="#7a4400" font-family="sans-serif">Sonnet</text>
+
+        <!-- Arrow → workers -->
+        <line x1="582" y1="79" x2="644" y2="60" stroke="#222233" stroke-width="1" marker-end="url(#arr)"/>
+        <line x1="582" y1="79" x2="644" y2="95" stroke="#222233" stroke-width="1" marker-end="url(#arr)"/>
+        <line x1="582" y1="160" x2="644" y2="145" stroke="#222233" stroke-width="1" marker-end="url(#arr)"/>
+        <line x1="582" y1="160" x2="644" y2="177" stroke="#222233" stroke-width="1" marker-end="url(#arr)"/>
+        <line x1="582" y1="242" x2="644" y2="228" stroke="#222233" stroke-width="1" marker-end="url(#arr)"/>
+        <line x1="582" y1="242" x2="644" y2="260" stroke="#222233" stroke-width="1" marker-end="url(#arr)"/>
+
+        <!-- Workers -->
+        <rect x="646" y="40" width="120" height="36" rx="7" fill="#111118" stroke="#333350" stroke-width="1"/>
+        <text x="706" y="63" text-anchor="middle" font-size="10" font-weight="600" fill="#8888a0" font-family="sans-serif">web-researcher</text>
+        <rect x="646" y="80" width="120" height="36" rx="7" fill="#111118" stroke="#333350" stroke-width="1"/>
+        <text x="706" y="103" text-anchor="middle" font-size="10" font-weight="600" fill="#8888a0" font-family="sans-serif">data-analyst</text>
+        <rect x="646" y="128" width="120" height="36" rx="7" fill="#111118" stroke="#333350" stroke-width="1"/>
+        <text x="706" y="151" text-anchor="middle" font-size="10" font-weight="600" fill="#8888a0" font-family="sans-serif">deploy-agent</text>
+        <rect x="646" y="162" width="120" height="36" rx="7" fill="#111118" stroke="#333350" stroke-width="1"/>
+        <text x="706" y="185" text-anchor="middle" font-size="10" font-weight="600" fill="#8888a0" font-family="sans-serif">monitor-agent</text>
+        <rect x="646" y="212" width="120" height="36" rx="7" fill="#111118" stroke="#333350" stroke-width="1"/>
+        <text x="706" y="235" text-anchor="middle" font-size="10" font-weight="600" fill="#8888a0" font-family="sans-serif">copywriter</text>
+        <rect x="646" y="252" width="120" height="36" rx="7" fill="#111118" stroke="#333350" stroke-width="1"/>
+        <text x="706" y="275" text-anchor="middle" font-size="10" font-weight="600" fill="#8888a0" font-family="sans-serif">editor</text>
+
+        <!-- Tools/Skills label -->
+        <rect x="790" y="55" width="70" height="82" rx="8" fill="rgba(0,255,136,0.04)" stroke="rgba(0,255,136,0.2)" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="825" y="80" text-anchor="middle" font-size="9" fill="#005533" font-family="sans-serif" font-weight="700" letter-spacing="1.5">SKILLS</text>
+        <text x="825" y="96" text-anchor="middle" font-size="9" fill="#005533" font-family="sans-serif">github</text>
+        <text x="825" y="109" text-anchor="middle" font-size="9" fill="#005533" font-family="sans-serif">web-search</text>
+        <text x="825" y="122" text-anchor="middle" font-size="9" fill="#005533" font-family="sans-serif">email</text>
+
+        <!-- Bottom bar: event stream -->
+        <rect x="50" y="296" width="770" height="30" rx="6" fill="#0a0a0f" stroke="#1a1a28" stroke-width="1"/>
+        <circle cx="68" cy="311" r="4" fill="var(--success)"/>
+        <text x="80" y="315" font-size="9" fill="#555570" font-family="monospace">session:start</text>
+        <circle cx="172" cy="311" r="4" fill="var(--amber)"/>
+        <text x="184" y="315" font-size="9" fill="#555570" font-family="monospace">agent:tool_call</text>
+        <circle cx="296" cy="311" r="4" fill="var(--gold)"/>
+        <text x="308" y="315" font-size="9" fill="#555570" font-family="monospace">agent:delegation</text>
+        <circle cx="432" cy="311" r="4" fill="var(--success)"/>
+        <text x="444" y="315" font-size="9" fill="#555570" font-family="monospace">task:completed</text>
+        <circle cx="558" cy="311" r="4" fill="var(--blue)"/>
+        <text x="570" y="315" font-size="9" fill="#555570" font-family="monospace">agent:message</text>
+        <circle cx="680" cy="311" r="4" fill="var(--danger)"/>
+        <text x="692" y="315" font-size="9" fill="#555570" font-family="monospace">agent:error</text>
+        <text x="782" y="315" font-size="9" fill="#333350" font-family="sans-serif" font-weight="600">&rarr; WebSocket</text>
+      </svg>
+    </div>
+
+    <div class="card-grid three">
+      <div class="card-sm">
+        <div class="label">Agents</div>
+        <div class="value">Markdown files with YAML frontmatter. Hierarchy defined by <code>reportsTo</code>. Models: Sonnet, Opus, Haiku.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Skills</div>
+        <div class="value">YAML tool bundles with HTTP actions. Credentials injected from vault at execution time via template substitution.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Events</div>
+        <div class="value">15 event types streamed via WebSocket. Every tool call, delegation, and result logged to JSONL traces and the dashboard.</div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════ TOPIC MENU — DIVE DEEPER ══════════════ -->
+  <section>
+    <h2>Dive Deeper <span class="tag">Topics</span></h2>
+
+    <div class="topic-grid">
+      <a href="#quickstart" class="topic-card">
+        <div class="topic-icon" style="background:rgba(212,160,32,0.1);border:1px solid rgba(212,160,32,0.2);">
+          <span style="color:var(--gold);">&#9655;</span>
+        </div>
+        <h4>Quick Start</h4>
+        <p>Init wizard, first agent, server &amp; dashboard setup in 5 minutes.</p>
+        <span class="topic-arrow">&darr; Jump to section</span>
+      </a>
+      <a href="#vault" class="topic-card">
+        <div class="topic-icon" style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);">
+          <span style="color:var(--success);">&#9670;</span>
+        </div>
+        <h4>Credential Vault</h4>
+        <p>AES-256-GCM encryption, the Proxy pattern, and output sanitization.</p>
+        <span class="topic-arrow">&darr; Jump to section</span>
+      </a>
+      <a href="#delegation" class="topic-card">
+        <div class="topic-icon" style="background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.2);">
+          <span style="color:var(--amber);">&#9670;</span>
+        </div>
+        <h4>Delegation Engine</h4>
+        <p>Hierarchy enforcement, circuit breakers, task lifecycle, and agent locking.</p>
+        <span class="topic-arrow">&darr; Jump to section</span>
+      </a>
+      <a href="#memory" class="topic-card">
+        <div class="topic-icon" style="background:rgba(212,160,32,0.08);border:1px solid rgba(212,160,32,0.15);">
+          <span style="color:var(--gold-dim);">&#9670;</span>
+        </div>
+        <h4>Memory &amp; Knowledge Graph</h4>
+        <p>Dual-database engine, deep sleep consolidation, scope promotion, briefings.</p>
+        <span class="topic-arrow">&darr; Jump to section</span>
+      </a>
+      <a href="#dashboard-section" class="topic-card">
+        <div class="topic-icon" style="background:rgba(68,136,255,0.08);border:1px solid rgba(68,136,255,0.2);">
+          <span style="color:var(--blue);">&#9670;</span>
+        </div>
+        <h4>Mission Control</h4>
+        <p>7 dashboard views, WebSocket streaming, Canvas org chart, SSE chat.</p>
+        <span class="topic-arrow">&darr; Jump to section</span>
+      </a>
+      <a href="#cli" class="topic-card">
+        <div class="topic-icon" style="background:rgba(255,68,102,0.08);border:1px solid rgba(255,68,102,0.2);">
+          <span style="color:var(--danger);">&#9670;</span>
+        </div>
+        <h4>CLI &amp; API Reference</h4>
+        <p>All commands, TUI slash commands, REST endpoints, and event types.</p>
+        <span class="topic-arrow">&darr; Jump to section</span>
+      </a>
+    </div>
+  </section>
+
+
+  <!-- ══════════════ QUICKSTART ══════════════ -->
+  <section id="quickstart">
+    <h2>Quick Start <span class="tag">Setup</span></h2>
+
+    <div class="card">
+      <div class="step-list">
+        <div class="step-item">
+          <h4>Install</h4>
+          <p class="prose-sm">Requires <strong>Node.js 22+</strong> and <strong>pnpm 10+</strong>.</p>
+          <pre style="margin-top:10px;margin-bottom:0;">git clone https://github.com/chrisgscott/maximus.git
+<span class="kw">cd</span> maximus && pnpm install && pnpm build</pre>
+        </div>
+        <div class="step-item">
+          <h4>Initialize Your Project</h4>
+          <p class="prose-sm">The <code>init</code> wizard creates <code>~/.maximus/</code> with everything you need. It prompts for your <strong>agent name</strong>, <strong>OAuth token</strong>, and <strong>vault encryption key</strong>. It generates your orchestrator agent, a <code>memory-extractor</code> agent for deep sleep, config, env file, and reference docs.</p>
+          <pre style="margin-top:10px;margin-bottom:0;">maximus init</pre>
+        </div>
+        <div class="step-item">
+          <h4>Start the Server &amp; Dashboard</h4>
+          <pre style="margin-top:6px;margin-bottom:4px;">maximus server start           <span class="cm"># Background, port 4100</span>
+<span class="kw">cd</span> packages/dashboard && pnpm dev  <span class="cm"># Port 4200</span></pre>
+          <p class="prose-sm" style="margin-top:8px;">Or just chat from the terminal: <code>maximus chat "Hello"</code> &mdash; or launch the full interactive TUI: <code>maximus</code></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════ VAULT ══════════════ -->
+  <section id="vault">
+    <h2>Credential Vault <span class="tag">Security</span></h2>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p class="prose" style="margin-bottom:16px;">Agents need API keys to call external services, but you don't want raw secrets in context windows where they could be logged, leaked, or hallucinated back. Maximus takes a <strong>zero-knowledge approach</strong> &mdash; credentials are encrypted at rest and only decrypted inside the tool execution boundary, never in agent-visible code paths.</p>
+      <p class="prose">All credentials use <strong>AES-256-GCM</strong> authenticated encryption. The key is derived from <code>MAXIMUS_VAULT_KEY</code> via <strong>scrypt</strong> with a 32-byte salt. Each credential gets a unique 16-byte IV from <code>crypto.randomBytes</code>. GCM's authentication tag detects tampering.</p>
+    </div>
+
+    <!-- Vault flow diagram -->
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;">
+      <svg viewBox="0 0 880 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <defs>
+          <marker id="va" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#333350"/></marker>
+          <marker id="vg" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#d4a020"/></marker>
+          <marker id="vr" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#ff4466"/></marker>
+        </defs>
+        <rect width="880" height="200" fill="#06060a"/>
+        <pattern id="vd" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx=".5" cy=".5" r=".5" fill="#111120"/></pattern>
+        <rect width="880" height="200" fill="url(#vd)"/>
+
+        <!-- Vault file -->
+        <rect x="30" y="65" width="130" height="55" rx="10" fill="#0a100e" stroke="#00ff88" stroke-width="1.5"/>
+        <text x="95" y="87" text-anchor="middle" font-size="11" font-weight="700" fill="#00ff88" font-family="sans-serif">Encrypted Vault</text>
+        <text x="95" y="104" text-anchor="middle" font-size="9" fill="#005533" font-family="sans-serif">{iv, data, tag} hex</text>
+
+        <!-- Arrow → Proxy -->
+        <line x1="160" y1="92" x2="208" y2="92" stroke="#333350" stroke-width="1.5" marker-end="url(#va)"/>
+
+        <!-- Credential Proxy -->
+        <rect x="210" y="65" width="150" height="55" rx="10" fill="#12100a" stroke="#d4a020" stroke-width="1.5" filter="url(#gf)"/>
+        <text x="285" y="87" text-anchor="middle" font-size="11" font-weight="700" fill="#d4a020" font-family="sans-serif">CredentialProxy</text>
+        <text x="285" y="104" text-anchor="middle" font-size="9" fill="#8a6a10" font-family="sans-serif">decrypt + inject_as</text>
+
+        <!-- Arrow → Interpolation -->
+        <line x1="360" y1="92" x2="408" y2="92" stroke="#d4a020" stroke-width="1.5" marker-end="url(#vg)"/>
+
+        <!-- Template Interpolation -->
+        <rect x="410" y="65" width="160" height="55" rx="10" fill="#111118" stroke="#333350" stroke-width="1.5"/>
+        <text x="490" y="87" text-anchor="middle" font-size="11" font-weight="700" fill="#e0e0e8" font-family="sans-serif">Interpolation</text>
+        <text x="490" y="104" text-anchor="middle" font-size="9" fill="#555570" font-family="sans-serif">{{TOKEN}} &rarr; actual value</text>
+
+        <!-- Arrow → HTTP -->
+        <line x1="570" y1="92" x2="618" y2="92" stroke="#333350" stroke-width="1.5" marker-end="url(#va)"/>
+
+        <!-- HTTP Request -->
+        <rect x="620" y="65" width="110" height="55" rx="10" fill="#111118" stroke="#333350" stroke-width="1.5"/>
+        <text x="675" y="87" text-anchor="middle" font-size="11" font-weight="700" fill="#8888a0" font-family="sans-serif">HTTP Call</text>
+        <text x="675" y="104" text-anchor="middle" font-size="9" fill="#555570" font-family="sans-serif">Bearer ghp_...</text>
+
+        <!-- Arrow → Sanitizer -->
+        <line x1="730" y1="92" x2="770" y2="92" stroke="#333350" stroke-width="1.5" marker-end="url(#va)"/>
+
+        <!-- Sanitizer -->
+        <rect x="772" y="65" width="90" height="55" rx="10" fill="#0f0608" stroke="#ff4466" stroke-width="1.5"/>
+        <text x="817" y="87" text-anchor="middle" font-size="11" font-weight="700" fill="#ff4466" font-family="sans-serif">Sanitizer</text>
+        <text x="817" y="104" text-anchor="middle" font-size="9" fill="#660022" font-family="sans-serif">[REDACTED]</text>
+
+        <!-- Agent gets clean result -->
+        <text x="817" y="148" text-anchor="middle" font-size="10" fill="#555570" font-family="sans-serif">Agent sees</text>
+        <text x="817" y="163" text-anchor="middle" font-size="10" fill="#555570" font-family="sans-serif">clean result</text>
+        <line x1="817" y1="120" x2="817" y2="138" stroke="#ff4466" stroke-width="1" marker-end="url(#vr)" opacity=".5"/>
+
+        <!-- Labels -->
+        <text x="95" y="145" text-anchor="middle" font-size="9" fill="#333350" font-family="sans-serif" font-weight="600">AES-256-GCM</text>
+        <text x="95" y="158" text-anchor="middle" font-size="9" fill="#333350" font-family="sans-serif">per-credential IV</text>
+        <text x="285" y="145" text-anchor="middle" font-size="9" fill="#333350" font-family="sans-serif" font-weight="600">scrypt key derivation</text>
+        <text x="285" y="158" text-anchor="middle" font-size="9" fill="#333350" font-family="sans-serif">32-byte salt</text>
+        <text x="490" y="145" text-anchor="middle" font-size="9" fill="#333350" font-family="sans-serif" font-weight="600">params + credentials</text>
+        <text x="490" y="158" text-anchor="middle" font-size="9" fill="#333350" font-family="sans-serif">merged, substituted</text>
+      </svg>
+    </div>
+
+    <div class="card">
+      <p class="prose-sm"><strong>Agent cannot access credentials programmatically</strong> &mdash; no vault API is exposed to agents. <strong>Credentials never in context window</strong> &mdash; agents see <code>{{TOKEN}}</code>, never values. <strong>Output sanitized</strong> &mdash; PostToolUse hook catches Anthropic keys (<code>sk-ant-*</code>), GitHub tokens (<code>ghp_*</code>), AWS keys (<code>AKIA*</code>), Bearer tokens, connection strings, and long hex strings. <strong>Authenticated encryption</strong> &mdash; tampered vault files detected by GCM tag.</p>
+    </div>
+  </section>
+
+
+  <!-- ══════════════ DELEGATION ══════════════ -->
+  <section id="delegation">
+    <h2>Delegation Engine <span class="tag">Multi-Agent</span></h2>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p class="prose" style="margin-bottom:16px;">When a parent agent needs work done, it calls the <code>delegate</code> tool &mdash; an MCP server injected into every session. Delegation is <strong>non-blocking</strong>: the parent gets a <code>taskId</code> immediately and continues working. Later, <code>check_task</code> polls for results, or <code>wait_for_tasks</code> awaits multiple in parallel.</p>
+    </div>
+
+    <div class="card-grid three" style="margin-bottom:14px;">
+      <div class="card-sm">
+        <div class="label">Hierarchy Check</div>
+        <div class="value">Target's <code>reportsTo</code> must match the sender. Agents can <strong>only</strong> delegate to direct reports.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Depth Limiter</div>
+        <div class="value">Max <strong>5 hops</strong> of nesting. Prevents infinite delegation loops.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Token Budget</div>
+        <div class="value">Sums all costs in the chain. Configurable ceiling prevents runaway API costs.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Task Lifecycle</h3>
+      <pre style="margin-bottom:8px;font-size:12px;">created  &rarr;  assigned  &rarr;  in-progress  &rarr;  completed
+                                          &rarr;  failed</pre>
+      <p class="prose-sm">Each transition emits an event to WebSocket clients and JSONL traces. The <strong>AgentLock</strong> serializes execution per agent &mdash; one run at a time per agent name, with a queue for subsequent requests. This prevents concurrent context corruption while allowing parallel delegation to <em>different</em> agents.</p>
+    </div>
+  </section>
+
+
+  <!-- ══════════════ MEMORY ══════════════ -->
+  <section id="memory">
+    <h2>Memory &amp; Knowledge Graph <span class="tag">Persistence</span></h2>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p class="prose" style="margin-bottom:16px;">Without memory, an agent that spent two sessions learning how to reliably paginate a particular API will rediscover that same lesson in session three. The memory system solves this at the swarm level with three jobs: <strong>record</strong> what agents experience, <strong>consolidate</strong> into a queryable knowledge graph overnight, and <strong>inject</strong> relevant facts back into each agent's system prompt.</p>
+      <p class="prose">Two storage backends: <strong>Kuzu</strong> (embedded graph database) for entities and relationship triples; <strong>SQLite</strong> for episodes, cached briefings, strategy registry, and metrics. Both are file-local and open lazily.</p>
+    </div>
+
+    <!-- Memory pipeline diagram -->
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;">
+      <svg viewBox="0 0 880 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+        <defs>
+          <marker id="ma" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#333350"/></marker>
+          <marker id="mg" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#d4a020"/></marker>
+        </defs>
+        <rect width="880" height="260" fill="#06060a"/>
+        <pattern id="md" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx=".5" cy=".5" r=".5" fill="#111120"/></pattern>
+        <rect width="880" height="260" fill="url(#md)"/>
+
+        <!-- Phase labels -->
+        <text x="30" y="30" font-size="9" fill="#d4a020" font-family="monospace" font-weight="700" letter-spacing="2">DEEP SLEEP PIPELINE (3 AM)</text>
+        <text x="610" y="30" font-size="9" fill="#d4a020" font-family="monospace" font-weight="700" letter-spacing="2">PRE-SESSION</text>
+
+        <!-- Session Traces -->
+        <rect x="30" y="55" width="120" height="50" rx="10" fill="#111118" stroke="#333350" stroke-width="1.5"/>
+        <text x="90" y="76" text-anchor="middle" font-size="11" font-weight="700" fill="#e0e0e8" font-family="sans-serif">Traces</text>
+        <text x="90" y="92" text-anchor="middle" font-size="9" fill="#555570" font-family="sans-serif">JSONL files</text>
+
+        <line x1="150" y1="80" x2="178" y2="80" stroke="#333350" stroke-width="1.5" marker-end="url(#ma)"/>
+
+        <!-- Distiller -->
+        <rect x="180" y="55" width="120" height="50" rx="10" fill="#12100a" stroke="#d4a020" stroke-width="1.5"/>
+        <text x="240" y="76" text-anchor="middle" font-size="10" font-weight="700" fill="#d4a020" font-family="sans-serif">Distiller</text>
+        <text x="240" y="91" text-anchor="middle" font-size="9" fill="#8a6a10" font-family="sans-serif">episodes + lessons</text>
+
+        <line x1="300" y1="80" x2="328" y2="80" stroke="#333350" stroke-width="1.5" marker-end="url(#ma)"/>
+
+        <!-- Extractor -->
+        <rect x="330" y="55" width="120" height="50" rx="10" fill="#100a00" stroke="#ff9800" stroke-width="1.5"/>
+        <text x="390" y="76" text-anchor="middle" font-size="10" font-weight="700" fill="#ff9800" font-family="sans-serif">Extractor</text>
+        <text x="390" y="91" text-anchor="middle" font-size="9" fill="#7a4400" font-family="sans-serif">Haiku &rarr; entities</text>
+
+        <line x1="450" y1="80" x2="478" y2="80" stroke="#333350" stroke-width="1.5" marker-end="url(#ma)"/>
+
+        <!-- Promoter -->
+        <rect x="480" y="55" width="110" height="50" rx="10" fill="#12100a" stroke="#d4a020" stroke-width="1.5"/>
+        <text x="535" y="76" text-anchor="middle" font-size="10" font-weight="700" fill="#d4a020" font-family="sans-serif">Promoter</text>
+        <text x="535" y="91" text-anchor="middle" font-size="9" fill="#8a6a10" font-family="sans-serif">scope escalation</text>
+
+        <!-- Arrow down to stores -->
+        <line x1="240" y1="105" x2="240" y2="148" stroke="#333350" stroke-width="1.2" marker-end="url(#ma)"/>
+        <line x1="390" y1="105" x2="390" y2="148" stroke="#333350" stroke-width="1.2" marker-end="url(#ma)"/>
+
+        <!-- SQLite -->
+        <rect x="180" y="150" width="120" height="50" rx="10" fill="#0a100e" stroke="#00ff88" stroke-width="1.5"/>
+        <text x="240" y="171" text-anchor="middle" font-size="11" font-weight="700" fill="#00ff88" font-family="sans-serif">SQLite</text>
+        <text x="240" y="187" text-anchor="middle" font-size="9" fill="#005533" font-family="sans-serif">episodes &middot; briefings</text>
+
+        <!-- Kuzu -->
+        <rect x="330" y="150" width="120" height="50" rx="10" fill="#12100a" stroke="#d4a020" stroke-width="1.5" filter="url(#gf)"/>
+        <text x="390" y="171" text-anchor="middle" font-size="11" font-weight="700" fill="#f0c040" font-family="sans-serif">Kuzu</text>
+        <text x="390" y="187" text-anchor="middle" font-size="9" fill="#8a6a10" font-family="sans-serif">knowledge graph</text>
+
+        <!-- Briefing Generator -->
+        <rect x="610" y="55" width="130" height="50" rx="10" fill="#0a100e" stroke="#00ff88" stroke-width="1.5"/>
+        <text x="675" y="76" text-anchor="middle" font-size="10" font-weight="700" fill="#00ff88" font-family="sans-serif">Briefing Gen</text>
+        <text x="675" y="91" text-anchor="middle" font-size="9" fill="#005533" font-family="sans-serif">prioritized markdown</text>
+
+        <!-- Arrows from stores to briefing -->
+        <path d="M300 175 Q460 175 608 80" stroke="#333350" stroke-width="1.2" fill="none" marker-end="url(#ma)" stroke-dasharray="5,3"/>
+        <path d="M450 175 Q540 140 608 80" stroke="#333350" stroke-width="1.2" fill="none" marker-end="url(#ma)" stroke-dasharray="5,3"/>
+
+        <!-- Arrow → Injector -->
+        <line x1="740" y1="80" x2="768" y2="80" stroke="#d4a020" stroke-width="1.5" marker-end="url(#mg)"/>
+
+        <!-- Prompt Injector -->
+        <rect x="770" y="55" width="90" height="50" rx="10" fill="#12100a" stroke="#d4a020" stroke-width="2" filter="url(#gf)"/>
+        <text x="815" y="76" text-anchor="middle" font-size="10" font-weight="700" fill="#d4a020" font-family="sans-serif">Injector</text>
+        <text x="815" y="91" text-anchor="middle" font-size="9" fill="#8a6a10" font-family="sans-serif">&rarr; system prompt</text>
+
+        <!-- Scope rings -->
+        <ellipse cx="390" cy="228" rx="220" ry="22" fill="rgba(212,160,32,0.04)" stroke="#d4a020" stroke-width=".8" stroke-dasharray="6,4" opacity=".4"/>
+        <text x="180" y="232" font-size="8" fill="#8a6a10" font-family="sans-serif" font-weight="600">GLOBAL</text>
+        <ellipse cx="390" cy="228" rx="140" ry="15" fill="rgba(255,152,0,0.04)" stroke="#ff9800" stroke-width=".8" stroke-dasharray="5,3" opacity=".5"/>
+        <text x="260" y="232" font-size="8" fill="#7a4400" font-family="sans-serif" font-weight="600">TEAM</text>
+        <ellipse cx="390" cy="228" rx="60" ry="10" fill="rgba(212,160,32,0.08)" stroke="#d4a020" stroke-width="1" opacity=".6"/>
+        <text x="374" y="232" font-size="8" fill="#d4a020" font-family="sans-serif" font-weight="600">AGENT</text>
+
+        <!-- Step badges -->
+        <circle cx="165" cy="68" r="9" fill="#111118" stroke="#222233" stroke-width="1"/><text x="165" y="72" text-anchor="middle" font-size="9" fill="#555570" font-family="monospace" font-weight="700">1</text>
+        <circle cx="315" cy="68" r="9" fill="#111118" stroke="#222233" stroke-width="1"/><text x="315" y="72" text-anchor="middle" font-size="9" fill="#555570" font-family="monospace" font-weight="700">2</text>
+        <circle cx="465" cy="68" r="9" fill="#111118" stroke="#222233" stroke-width="1"/><text x="465" y="72" text-anchor="middle" font-size="9" fill="#555570" font-family="monospace" font-weight="700">3</text>
+        <circle cx="755" cy="68" r="9" fill="#12100a" stroke="#d4a020" stroke-width="1"/><text x="755" y="72" text-anchor="middle" font-size="9" fill="#d4a020" font-family="monospace" font-weight="700">4</text>
+
+        <!-- Legend -->
+        <rect x="620" y="138" width="240" height="62" rx="8" fill="#111118" stroke="#222233" stroke-width="1"/>
+        <line x1="632" y1="158" x2="648" y2="158" stroke="#333350" stroke-width="1.5"/><text x="654" y="162" font-size="9" fill="#555570" font-family="sans-serif">consolidation (async)</text>
+        <line x1="632" y1="174" x2="648" y2="174" stroke="#d4a020" stroke-width="1.5"/><text x="654" y="178" font-size="9" fill="#d4a020" font-family="sans-serif">pre-session injection</text>
+        <line x1="632" y1="190" x2="648" y2="190" stroke="#333350" stroke-width="1.2" stroke-dasharray="4,2"/><text x="654" y="194" font-size="9" fill="#555570" font-family="sans-serif">data flow to briefing</text>
+      </svg>
+    </div>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p class="prose-sm" style="margin-bottom:16px;">The pipeline runs during <strong>deep sleep</strong> (default 3 AM daily) so zero overhead touches live sessions. Each stage is independently error-handled &mdash; a failure in extraction doesn't block briefing generation.</p>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="component-item">
+          <div class="component-name" style="color:var(--gold);">EpisodeDistiller</div>
+          <p class="prose-sm" style="margin:0;">Reads JSONL traces and extracts structured episodes: summary, outcome (<code>success</code>/<code>failure</code>/<code>partial</code>), lessons from tool pair analysis, effective strategies (3+ consecutive successes), failure patterns, and <strong>regression detection</strong> (task that previously succeeded but now fails). No LLM involved &mdash; pure parsing.</p>
+        </div>
+        <div class="component-item amber">
+          <div class="component-name" style="color:var(--amber);">EntityExtractor</div>
+          <p class="prose-sm" style="margin:0;">Sends episodes to <strong>Claude Haiku</strong> in parallel. Returns typed entities and relationship triples with confidence scores (0.9 for confirmed facts, 0.7 for patterns, 0.5 for inferences). Entities deduplicated by name; attributes merged across extractions. Uses the <code>memory-extractor</code> agent created by <code>init</code>.</p>
+        </div>
+        <div class="component-item">
+          <div class="component-name" style="color:var(--gold);">ScopePromoter</div>
+          <p class="prose-sm" style="margin:0;">Agent&rarr;Team: when 2+ teammates share a fact, or retrieval count exceeds threshold (adjusted by success rate &mdash; high-success agents promote at 60% of base). Team&rarr;Global: 2+ distinct team evidence tags. Orchestrator knowledge auto-promoted to global.</p>
+        </div>
+        <div class="component-item green">
+          <div class="component-name" style="color:var(--success);">BriefingGenerator</div>
+          <p class="prose-sm" style="margin:0;">Assembles prioritized markdown within <code>briefingTokenBudget</code>. Strict priority: <strong>failure lessons first</strong>, then performance trends (7-day window), then high-confidence graph facts, then proven strategies (usage &ge;2). When content exceeds budget, strategies trimmed before knowledge, knowledge before lessons.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Temporal Supersession</h3>
+      <p class="prose-sm" style="margin-bottom:8px;">The knowledge graph is an <strong>append-only fact log</strong>. When a new fact contradicts an existing one (same source, predicate, target), the old triple's <code>validTo</code> is timestamped and a new triple is inserted. History is never deleted. Every belief change is recorded &mdash; you can inspect exactly what changed in an agent's knowledge graph and which episode caused it.</p>
+      <p class="prose-sm"><a href="knowledge-graph.html" style="color:var(--gold);text-decoration:none;font-weight:600;">Full Knowledge Graph documentation with interactive SVG diagrams &rarr;</a></p>
+    </div>
+  </section>
+
+
+  <!-- ══════════════ DASHBOARD ══════════════ -->
+  <section id="dashboard-section">
+    <h2>Mission Control <span class="tag">Dashboard</span></h2>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p class="prose">Next.js 16 + React 19 + Zustand + Tailwind CSS v4. Connects via WebSocket (auto-reconnect with exponential backoff, 1s to 30s) and REST. All URLs are relative &mdash; no env vars needed.</p>
+    </div>
+
+    <div class="card-grid" style="margin-bottom:14px;">
+      <div class="card-sm">
+        <div class="label">Operations</div>
+        <div class="value">Real-time event feed. 15 event types with icons and colors. Filter by type or agent. Expandable payload JSON.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Org Chart</div>
+        <div class="value">HTML5 Canvas with animated spinning arcs and delegation particles. Click agents for details, recent events, active tasks. Drag to pan, scroll to zoom.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Chat</div>
+        <div class="value">SSE streaming with markdown rendering (tables, code blocks via remark-gfm). Persistent history in localStorage. Pulsing cursor during streaming.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Tasks</div>
+        <div class="value">Sortable/filterable table. Status badges: created, assigned, in-progress, completed, failed. Expandable rows show prompt, result, token usage.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Knowledge Graph</div>
+        <div class="value">Force-directed visualization of entities and triples. Scope filtering (agent/team/global). Color-coded nodes with predicate labels.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Agent Memory</div>
+        <div class="value">Split-panel: agent list with episode counts. Per-agent: episodes, metrics charts, active briefing, knowledge triples.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Jobs</div>
+        <div class="value">Cron-scheduled job management. Create/edit/delete. Run history with duration and status. Manual trigger button.</div>
+      </div>
+      <div class="card-sm">
+        <div class="label">Connection</div>
+        <div class="value">Header shows agent count, running tasks. Green/amber/red dot for WebSocket status. Reconnecting banner during backoff.</div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════ CLI & API ══════════════ -->
+  <section id="cli">
+    <h2>CLI &amp; API <span class="tag">Reference</span></h2>
+
+    <div class="card" style="margin-bottom:14px;">
+      <p class="prose-sm">Running <code>maximus</code> with no arguments launches the <strong>interactive TUI</strong> &mdash; branded ASCII logo, persistent chat with streaming, status bar (server state, agents, tasks, uptime), and slash commands (<code>/start</code>, <code>/stop</code>, <code>/vault set</code>, <code>/new</code>, <code>/help</code>).</p>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;">
+      <table>
+        <thead><tr><th>Command</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>maximus init</code></td><td>Interactive wizard. Creates <code>~/.maximus/</code> with agents, skills, vault, memory, traces, config, env, and reference docs.</td></tr>
+          <tr><td><code>maximus doctor</code></td><td>Validates 6 subsystems: agents, memory (SQLite/Kuzu + episode count + last consolidation), vault, traces, deep sleep (memory-extractor exists), skills. PASS/WARN/FAIL.</td></tr>
+          <tr><td><code>maximus server start|stop|restart|status</code></td><td>Server lifecycle. <code>-f</code> foreground, <code>-p</code> port override. Default: background with PID file.</td></tr>
+          <tr><td><code>maximus agents list|org-chart</code></td><td>List agents or render Unicode hierarchy tree.</td></tr>
+          <tr><td><code>maximus chat ["msg"]</code></td><td>One-shot SSE stream, or interactive REPL without args.</td></tr>
+          <tr><td><code>maximus vault set|get|list|delete</code></td><td>Credential management. <code>get</code> is raw/pipe-friendly. <code>list</code> shows names only.</td></tr>
+          <tr><td><code>maximus memory status|inspect|promote</code></td><td>Memory stats, per-agent details, or manual scope promotion.</td></tr>
+          <tr><td><code>maximus memory re-extract [--yes]</code></td><td>Flush extracted data, reprocess all traces with current pipeline.</td></tr>
+          <tr><td><code>maximus memory reset [--yes]</code></td><td><strong style="color:var(--danger);">Destructive.</strong> Deletes all traces and memory data.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>REST API</h3>
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;">
+      <table>
+        <thead><tr><th>Endpoint</th><th>Method</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>/api/health</code></td><td><span class="pill pill-green">GET</span></td><td>Health check, uptime</td></tr>
+          <tr><td><code>/api/agents</code></td><td><span class="pill pill-green">GET</span></td><td>List agents (hot-reload)</td></tr>
+          <tr><td><code>/api/agents/org-chart</code></td><td><span class="pill pill-green">GET</span></td><td>Hierarchy tree</td></tr>
+          <tr><td><code>/api/chat</code></td><td><span class="pill pill-amber">POST</span></td><td>Send message, SSE response</td></tr>
+          <tr><td><code>/api/chat/stream</code></td><td><span class="pill pill-green">GET</span></td><td>Persistent session SSE</td></tr>
+          <tr><td><code>/api/chat/message</code></td><td><span class="pill pill-amber">POST</span></td><td>Queue to persistent session</td></tr>
+          <tr><td><code>/api/chat/new</code></td><td><span class="pill pill-amber">POST</span></td><td>Reset session</td></tr>
+          <tr><td><code>/api/tasks</code></td><td><span class="pill pill-green">GET</span></td><td>List tasks (filter: agent, status, trace)</td></tr>
+          <tr><td><code>/api/jobs</code></td><td><span class="pill pill-green">GET</span> <span class="pill pill-amber">POST</span></td><td>List/create jobs</td></tr>
+          <tr><td><code>/api/jobs/:id/run</code></td><td><span class="pill pill-amber">POST</span></td><td>Trigger immediate execution</td></tr>
+          <tr><td><code>/api/memory/status</code></td><td><span class="pill pill-green">GET</span></td><td>Entity/triple/episode counts</td></tr>
+          <tr><td><code>/api/memory/graph</code></td><td><span class="pill pill-green">GET</span></td><td>Knowledge graph data</td></tr>
+          <tr><td><code>/api/memory/inspect/:agent</code></td><td><span class="pill pill-green">GET</span></td><td>Agent memory details</td></tr>
+          <tr><td><code>/ws</code></td><td><span class="pill pill-gold">WS</span></td><td>Real-time event stream (15 types)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Event Types</h3>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table>
+        <thead><tr><th>Event</th><th>When</th><th>Key Payload</th></tr></thead>
+        <tbody>
+          <tr><td><code>session:start</code></td><td>Agent session begins</td><td>task, message</td></tr>
+          <tr><td><code>session:end</code></td><td>Session completes</td><td>success, totalCostUsd, numTurns</td></tr>
+          <tr><td><code>agent:message</code></td><td>Text output</td><td>content, chunked</td></tr>
+          <tr><td><code>agent:tool_call</code></td><td>Tool invoked</td><td>tool, input</td></tr>
+          <tr><td><code>agent:tool_result</code></td><td>Tool returns</td><td>tool, result, success</td></tr>
+          <tr><td><code>agent:error</code></td><td>Session error</td><td>error, message</td></tr>
+          <tr><td><code>task:*</code></td><td>created / assigned / completed / failed</td><td>taskId, agent, result or error</td></tr>
+          <tr><td><code>job:*</code></td><td>started / completed / failed</td><td>jobId, jobName, durationMs</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <!-- ══════════════ DOCS ══════════════ -->
+  <section>
+    <h2>Documentation <span class="tag">Deep Dives</span></h2>
+    <div class="doc-grid">
+      <a href="getting-started.html" class="doc-link"><div class="doc-title">Getting Started</div><div class="doc-desc">Installation, init wizard, first agent team, dashboard walkthrough</div></a>
+      <a href="agent-definition.html" class="doc-link"><div class="doc-title">Agent Definitions</div><div class="doc-desc">Full YAML schema, all fields, memory configuration</div></a>
+      <a href="skill-definition.html" class="doc-link"><div class="doc-title">Skill Definitions</div><div class="doc-desc">Tool definitions, HTTP actions, credential binding</div></a>
+      <a href="multi-agent.html" class="doc-link"><div class="doc-title">Multi-Agent Coordination</div><div class="doc-desc">Hierarchy, delegation, circuit breakers, task lifecycle</div></a>
+      <a href="credential-vault.html" class="doc-link"><div class="doc-title">Credential Vault</div><div class="doc-desc">AES-256-GCM, proxy pattern, sanitization patterns</div></a>
+      <a href="knowledge-graph.html" class="doc-link"><div class="doc-title">Knowledge Graph &amp; Memory</div><div class="doc-desc">Entities, triples, scope hierarchy, deep sleep pipeline</div></a>
+      <a href="dashboard.html" class="doc-link"><div class="doc-title">Dashboard</div><div class="doc-desc">7 views, 15 event types, Canvas org chart, SSE chat</div></a>
+      <a href="memory-evolution.html" class="doc-link"><div class="doc-title">Memory Evolution</div><div class="doc-desc">Pipeline tuning, performance trends, strategy registry</div></a>
+    </div>
+  </section>
+
+
+  <footer>
+    Maximus &middot; Self-Hosted Agent Orchestration &middot; Built with <a href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-agent-sdk">Claude Agent SDK</a>
+  </footer>
+
+</div>
+</body>
+</html>

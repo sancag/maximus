@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <style>
+      .bg   { fill: #0b0b0b; }
+      .hex  { stroke: #C4851A; fill: none; stroke-width: 0.5; }
+      .m    { stroke: #E8A422; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+      .node { fill: #C4851A; }
+      .node-bright { fill: #E8A422; }
+
+      @media (prefers-color-scheme: light) {
+        .bg   { fill: #ffffff; }
+        .hex  { stroke: #9A6010; }
+        .m    { stroke: #B47C14; }
+        .node { fill: #9A6010; }
+        .node-bright { fill: #B47C14; }
+      }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="32" height="32" rx="7"/>
+
+  <line class="hex" x1="16" y1="2.5" x2="27.5" y2="9"/>
+  <line class="hex" x1="27.5" y1="11" x2="27.5" y2="21"/>
+  <line class="hex" x1="27.5" y1="23" x2="16" y2="29.5"/>
+  <line class="hex" x1="4.5" y1="23" x2="16" y2="29.5"/>
+  <line class="hex" x1="4.5" y1="11" x2="4.5" y2="21"/>
+  <line class="hex" x1="4.5" y1="9" x2="16" y2="2.5"/>
+
+  <circle class="node-bright" cx="16" cy="2.5" r="1.1"/>
+  <circle class="node" cx="27.5" cy="10" r="1.1"/>
+  <circle class="node" cx="27.5" cy="22" r="1.1"/>
+  <circle class="node" cx="16" cy="29.5" r="1.1"/>
+  <circle class="node" cx="4.5" cy="22" r="1.1"/>
+  <circle class="node" cx="4.5" cy="10" r="1.1"/>
+
+  <polyline class="m" points="7,23 7,9 16,17 25,9 25,23"/>
+
+  <circle class="node-bright" cx="7"  cy="23" r="1.4"/>
+  <circle class="node-bright" cx="25" cy="23" r="1.4"/>
+  <circle class="node-bright" cx="16" cy="17" r="1.6"/>
+</svg>

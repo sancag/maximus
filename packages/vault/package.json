@@ -1,0 +1,23 @@
+{
+	"name": "@maximus/vault",
+	"version": "0.1.0",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": { ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" } },
+	"scripts": {
+		"build": "tsup src/index.ts --format esm --dts",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@maximus/shared": "workspace:*",
+		"zod": "^4.3.6",
+		"nanoid": "^5.1.7"
+	},
+	"devDependencies": {
+		"typescript": "^5.7",
+		"tsup": "^8.5.1",
+		"vitest": "^4.1.0",
+		"@types/node": "^22"
+	}
+}

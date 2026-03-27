@@ -1,0 +1,45 @@
+name: github-operations
+description: Create and manage GitHub issues, PRs, and repositories
+version: "1.0"
+
+credentials:
+  - name: github_token
+    description: GitHub Personal Access Token with repo scope
+
+tools:
+  - name: github_create_issue
+    description: Create an issue on a GitHub repository
+    parameters:
+      repo:
+        type: string
+        description: "Repository in owner/name format"
+      title:
+        type: string
+        description: "Issue title"
+      body:
+        type: string
+        description: "Issue body"
+    credentials:
+      - ref: github_token
+        inject_as: GITHUB_TOKEN
+    action:
+      type: http
+      method: POST
+      url: "https://api.github.com/repos/{{repo}}/issues"
+      headers:
+        Authorization: "Bearer {{GITHUB_TOKEN}}"
+        Content-Type: application/json
+      body:
+        title: "{{title}}"
+        body: "{{body}}"
+    output:
+      include:
+        - number
+        - html_url
+        - state
+
+instructions: |
+  When working with GitHub:
+  - Always check if an issue already exists before creating a new one
+  - Use descriptive titles that summarize the problem
+  - Include relevant context in the issue body

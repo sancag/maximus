@@ -1,0 +1,31 @@
+name: web-search
+description: Search the web for information
+version: "1.0"
+
+credentials:
+  - name: search_api_key
+    description: API key for search service
+
+tools:
+  - name: search_web
+    description: Search the web for a query
+    parameters:
+      query:
+        type: string
+        description: "Search query string"
+      max_results:
+        type: number
+        description: "Maximum results to return"
+        required: false
+    credentials:
+      - ref: search_api_key
+        inject_as: SEARCH_API_KEY
+    action:
+      type: http
+      method: GET
+      url: "https://api.search.example.com/v1/search?q={{query}}&key={{SEARCH_API_KEY}}"
+
+instructions: |
+  Use specific, targeted search queries.
+  Prefer authoritative sources over blogs.
+  Always note the source URL in your findings.

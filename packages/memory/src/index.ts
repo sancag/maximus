@@ -1,0 +1,18 @@
+export { MemoryEngine } from "./engine.js";
+export { KuzuClient } from "./kuzu/client.js";
+export { SqliteClient } from "./sqlite/client.js";
+export { EpisodeStore } from "./sqlite/episodes.js";
+export { MetricsTracker } from "./sqlite/metrics.js";
+export { SwarmMetrics } from "./sqlite/swarm-metrics.js";
+export { TraceReader } from "./trace/reader.js";
+export { EpisodeDistiller } from "./trace/distiller.js";
+export { KnowledgeStore } from "./kuzu/knowledge-store.js";
+export { EntityExtractor } from "./extract/entity-extractor.js";
+export type { LlmFn, ExtractionResult } from "./extract/entity-extractor.js";
+export { BriefingStore } from "./sqlite/briefing-store.js";
+export { BriefingGenerator } from "./briefing/briefing-generator.js";
+export { PromptInjector } from "./briefing/prompt-injector.js";
+export { KUZU_SCHEMA_DDL } from "./kuzu/schema.js";
+export { SQLITE_SCHEMA_DDL } from "./sqlite/schema.js";
+export { DeepSleepPipeline } from "./pipeline/deep-sleep-pipeline.js";
+export { ScopePromoter } from "./pipeline/scope-promoter.js";

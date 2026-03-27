@@ -1,0 +1,69 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+	--font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+		sans-serif;
+	--color-dominant: #0a0a0f;
+	--color-surface: #111118;
+	--color-elevated: #1a1a24;
+	--color-accent: #d4a020;
+	--color-success: #00ff88;
+	--color-warning: #ffaa00;
+	--color-destructive: #ff4466;
+	--color-text-primary: #e0e0e8;
+	--color-text-secondary: #8888a0;
+	--color-border: #222233;
+}
+
+:root {
+	--glow-accent: 0 0 12px rgba(212, 160, 32, 0.3);
+	--glow-accent-strong: 0 0 20px rgba(212, 160, 32, 0.5);
+	--glow-success: 0 0 8px rgba(0, 255, 136, 0.25);
+	--glow-error: 0 0 8px rgba(255, 68, 102, 0.25);
+
+	/* Jarvis / Gold theme for agent viz */
+	--jarvis-gold: #d4a020;
+	--jarvis-gold-bright: #f0c040;
+	--jarvis-gold-dim: #8a6a10;
+	--jarvis-amber: #ff9800;
+	--jarvis-orange: #e65100;
+	--jarvis-bg: #06060a;
+	--jarvis-ring: rgba(212, 160, 32, 0.08);
+}
+
+@keyframes pulse-glow {
+	0%,
+	100% {
+		box-shadow: var(--glow-accent);
+	}
+	50% {
+		box-shadow: var(--glow-accent-strong);
+	}
+}
+
+@keyframes pulse-dot {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.4;
+	}
+}
+
+@keyframes skeleton-pulse {
+	0%,
+	100% {
+		opacity: 0.3;
+	}
+	50% {
+		opacity: 0.6;
+	}
+}
+
+body {
+	background-color: var(--color-dominant);
+	color: var(--color-text-primary);
+	font-family: var(--font-sans);
+}

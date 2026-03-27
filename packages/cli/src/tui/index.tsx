@@ -1,0 +1,10 @@
+import React from "react";
+import { render } from "ink";
+import { App } from "./App.js";
+
+export async function startTui(): Promise<void> {
+	const { waitUntilExit } = render(<App />, {
+		exitOnCtrlC: false,
+	});
+	await waitUntilExit();
+}
